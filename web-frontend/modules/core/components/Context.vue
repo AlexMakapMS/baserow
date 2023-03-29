@@ -1,6 +1,11 @@
 <template>
   <div class="context" :class="{ 'visibility-hidden': !open || !updatedOnce }">
-    <slot v-if="openedOnce"></slot>
+    <main>
+      <slot v-if="openedOnce"></slot>
+    </main>
+    <footer>
+      <slot name="footer"></slot>
+    </footer>
   </div>
 </template>
 
@@ -125,6 +130,7 @@ export default {
       // be available in DOM for accurate positioning.
       await this.$nextTick()
       updatePosition()
+      this.setMaxHeight()
 
       this.$el.cancelOnClickOutside = onClickOutside(this.$el, (target) => {
         if (
@@ -143,6 +149,9 @@ export default {
           this.hide()
         }
       })
+
+      console.log(vertical)
+      this.setMaxHeight()
 
       this.$el.updatePositionEvent = (event) => {
         updatePosition()
@@ -396,6 +405,12 @@ export default {
       }
 
       return { vertical, horizontal }
+    },
+    async setMaxHeight() {
+      await this.$nextTick()
+      // adding 25px to the calculation so the context menu bottom
+      // edge doesn't come too close to the browser window
+      this.$el.style.maxHeight = `calc(100vh - (${this.$el.offsetTop + 25}px)`
     },
   },
 }

@@ -1,6 +1,4 @@
 .filters {
-  padding: 12px;
-
   .dropdown__selected {
     @extend %ellipsis;
   }
@@ -162,9 +160,6 @@
 }
 
 .filters__add {
-  display: inline-block;
-  margin: 12px 0 6px 4px;
-
   &:hover {
     text-decoration: none;
     color: $color-primary-900;
