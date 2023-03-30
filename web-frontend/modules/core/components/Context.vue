@@ -113,7 +113,7 @@ export default {
 
         // Set the calculated positions of the context.
         for (const key in css) {
-          const value = css[key] !== null ? Math.ceil(css[key]) + 'px' : 'auto'
+          const value = css[key] !== null ? css[key] : 'auto'
           this.$el.style[key] = value
         }
         this.updatedOnce = true
@@ -150,7 +150,6 @@ export default {
         }
       })
 
-      console.log(vertical)
       this.setMaxHeight()
 
       this.$el.updatePositionEvent = (event) => {
@@ -274,26 +273,31 @@ export default {
         )
 
       // Calculate the correct positions for horizontal and vertical values.
-      if (horizontalAdjusted === 'left') {
-        positions.left = targetRect.left + horizontalOffset
-      }
+      if (horizontalAdjusted === 'left')
+        positions.left = `${targetRect.left + horizontalOffset}px`
 
-      if (horizontalAdjusted === 'right') {
-        positions.right =
+      if (horizontalAdjusted === 'right')
+        positions.right = `${
           window.innerWidth - targetRect.right - horizontalOffset
+        }px`
+
+      // in case there is no enough space on the right and left
+      // we horizontally center the context menu in the viewport
+      if (horizontalAdjusted === 'window') {
+        positions.left = '50%'
+        positions.transform = 'translateX(-50%)'
+        positions.width = '90%'
       }
 
-      if (verticalAdjusted === 'bottom') {
-        positions.top = targetRect.bottom + verticalOffset
-      }
+      if (verticalAdjusted === 'bottom')
+        positions.top = `${targetRect.bottom + verticalOffset}px`
 
-      if (verticalAdjusted === 'top') {
-        positions.bottom = window.innerHeight - targetRect.top + verticalOffset
-      }
+      if (verticalAdjusted === 'top')
+        positions.bottom = `${
+          window.innerHeight - targetRect.top + verticalOffset
+        }px`
 
-      if (!visible) {
-        target.classList.remove('forced-block')
-      }
+      if (!visible) target.classList.remove('forced-block')
 
       return positions
     },
@@ -388,21 +392,15 @@ export default {
 
       // If bottom, top, left or right doesn't fit, but their opposite does we switch to
       // that.
-      if (vertical === 'bottom' && !canBottom && canTop) {
-        vertical = 'top'
-      }
+      if (vertical === 'bottom' && !canBottom && canTop) vertical = 'top'
 
-      if (vertical === 'top' && !canTop) {
-        vertical = 'bottom'
-      }
+      if (vertical === 'top' && !canTop) vertical = 'bottom'
 
-      if (horizontal === 'left' && !canLeft && canRight) {
-        horizontal = 'right'
-      }
+      if (horizontal === 'left' && !canLeft && canRight) horizontal = 'right'
 
-      if (horizontal === 'right' && !canRight) {
-        horizontal = 'left'
-      }
+      if (horizontal === 'right' && !canRight) horizontal = 'left'
+
+      if (!canLeft && !canRight) horizontal = 'window'
 
       return { vertical, horizontal }
     },
