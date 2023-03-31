@@ -1,9 +1,9 @@
 <template>
   <div class="context" :class="{ 'visibility-hidden': !open || !updatedOnce }">
-    <main>
+    <main class="context__main">
       <slot v-if="openedOnce"></slot>
     </main>
-    <footer>
+    <footer v-if="hasFooterSlot" class="context__footer">
       <slot name="footer"></slot>
     </footer>
   </div>
@@ -36,6 +36,15 @@ export default {
       // If opened once, should stay in DOM to keep nested content
       openedOnce: false,
     }
+  },
+
+  computed: {
+    hasFooterSlot() {
+      return !!this.$slots.footer
+    },
+  },
+  mounted() {
+    console.log(!!this.$slots.footer)
   },
   methods: {
     /**
