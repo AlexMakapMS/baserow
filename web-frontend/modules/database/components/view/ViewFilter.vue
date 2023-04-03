@@ -21,6 +21,7 @@
       :class="{ 'context--loading-overlay': view._.loading }"
     >
       <ViewFilterForm
+        class="filters_main"
         :fields="fields"
         :view="view"
         :read-only="readOnly"
