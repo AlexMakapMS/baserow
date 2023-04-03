@@ -2,6 +2,7 @@
   <Context
     ref="context"
     class="field-form-context"
+    overflow-y="visible"
     @shown="$emit('shown', $event)"
   >
     <FieldForm

@@ -1,6 +1,6 @@
 <template>
   <div class="context" :class="{ 'visibility-hidden': !open || !updatedOnce }">
-    <main class="context__main">
+    <main ref="mainCointainer" class="context__main">
       <slot v-if="openedOnce"></slot>
     </main>
     <footer v-if="hasFooterSlot" class="context__footer">
@@ -27,6 +27,14 @@ export default {
       default: true,
       required: false,
     },
+    overflowY: {
+      type: String,
+      default: 'auto',
+      required: false,
+      validator(value) {
+        return ['auto', 'visible'].includes(value)
+      },
+    },
   },
   data() {
     return {
@@ -37,14 +45,13 @@ export default {
       openedOnce: false,
     }
   },
-
   computed: {
     hasFooterSlot() {
       return !!this.$slots.footer
     },
   },
   mounted() {
-    console.log(!!this.$slots.footer)
+    this.$refs.mainCointainer.style.overflowY = this.overflowY
   },
   methods: {
     /**
