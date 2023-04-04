@@ -6,12 +6,15 @@
       :key="element.id"
       v-bind="getType(element).getComponentProps(element)"
       class="element__component"
+      :builder="builder"
+      :mode="mode"
     />
   </div>
 </template>
 
 <script>
 export default {
+  inject: ['builder', 'mode'],
   props: {
     page: {
       type: Object,

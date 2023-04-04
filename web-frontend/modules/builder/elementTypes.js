@@ -1,8 +1,11 @@
 import { Registerable } from '@baserow/modules/core/registry'
 import ParagraphElement from '@baserow/modules/builder/components/elements/components/ParagraphElement'
 import HeadingElement from '@baserow/modules/builder/components/elements/components/HeadingElement'
+import LinkElement from '@baserow/modules/builder/components/elements/components/LinkElement'
+import LinkElementEdit from '@baserow/modules/builder/components/elements/components/LinkElementEdit'
 import ParagraphElementForm from '@baserow/modules/builder/components/elements/components/forms/ParagraphElementForm'
 import HeadingElementForm from '@baserow/modules/builder/components/elements/components/forms/HeadingElementForm'
+import LinkElementForm from '@baserow/modules/builder/components/elements/components/forms/LinkElementForm'
 
 export class ElementType extends Registerable {
   get name() {
@@ -19,6 +22,10 @@ export class ElementType extends Registerable {
 
   get component() {
     return null
+  }
+
+  get editComponent() {
+    return this.component
   }
 
   get formComponent() {
@@ -109,6 +116,50 @@ export class ParagraphElementType extends ElementType {
   getComponentProps(element) {
     return {
       value: element.value,
+    }
+  }
+}
+
+export class LinkElementType extends ElementType {
+  getType() {
+    return 'link'
+  }
+
+  get name() {
+    return this.app.i18n.t('elementType.link')
+  }
+
+  get description() {
+    return this.app.i18n.t('elementType.linkDescription')
+  }
+
+  get iconClass() {
+    return 'link'
+  }
+
+  get component() {
+    return LinkElement
+  }
+
+  get editComponent() {
+    return LinkElementEdit
+  }
+
+  get formComponent() {
+    return LinkElementForm
+  }
+
+  getComponentProps(element) {
+    return {
+      value: element.value,
+      alignment: element.alignment,
+      variant: element.variant,
+      width: element.width,
+      target: element.target,
+      navigation_type: element.navigation_type,
+      navigate_to_page_id: element.navigate_to_page_id,
+      navigate_to_url: element.navigate_to_url,
+      page_parameters: element.page_parameters,
     }
   }
 }

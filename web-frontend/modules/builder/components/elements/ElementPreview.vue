@@ -19,10 +19,11 @@
       @duplicate="$emit('duplicate')"
     />
     <component
-      :is="elementType.component"
+      :is="elementType.editComponent"
       v-bind="elementType.getComponentProps(element)"
       class="element__component"
-    ></component>
+      :builder="builder"
+    />
     <InsertElementButton
       v-if="active"
       class="element__insert--bottom"
@@ -38,6 +39,7 @@ import { PLACEMENTS } from '@baserow/modules/builder/enums'
 export default {
   name: 'ElementPreview',
   components: { ElementMenu, InsertElementButton },
+  inject: ['builder'],
   props: {
     element: {
       type: Object,

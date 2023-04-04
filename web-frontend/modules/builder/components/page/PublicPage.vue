@@ -15,10 +15,6 @@ import PublicBuilderService from '@baserow/modules/builder/services/publicBuilde
 export default {
   components: { PageContent },
   props: {
-    builder: {
-      type: Object,
-      required: true,
-    },
     page: {
       type: Object,
       required: true,
