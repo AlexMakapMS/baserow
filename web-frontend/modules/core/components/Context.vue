@@ -32,7 +32,7 @@ export default {
       default: 'auto',
       required: false,
       validator(value) {
-        return ['auto', 'visible'].includes(value)
+        return ['auto', 'visible', 'hidden'].includes(value)
       },
     },
   },
@@ -50,8 +50,13 @@ export default {
       return !!this.$slots.footer
     },
   },
+  watch: {
+    overflowY(value) {
+      this.setOverflowY(value)
+    },
+  },
   mounted() {
-    this.$refs.mainCointainer.style.overflowY = this.overflowY
+    this.setOverflowY('auto')
   },
   methods: {
     /**
@@ -425,6 +430,9 @@ export default {
       // adding 25px to the calculation so the context menu bottom
       // edge doesn't come too close to the browser window
       this.$el.style.maxHeight = `calc(100vh - (${this.$el.offsetTop + 25}px)`
+    },
+    setOverflowY() {
+      this.$refs.mainCointainer.style.overflowY = this.overflowY
     },
   },
 }

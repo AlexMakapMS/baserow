@@ -25,8 +25,11 @@
           v-if="index === 1 && !disableFilter"
           :value="filterType"
           :show-search="false"
+          :context-target="contextTarget"
           class="dropdown--floating dropdown--tiny"
           @input="selectBooleanOperator($event)"
+          @show="$emit('dropdownOpen')"
+          @hide="$emit('dropdownClosed')"
         >
           <DropdownItem
             :name="$t('viewFilterContext.and')"
@@ -49,8 +52,11 @@
         <Dropdown
           :value="filter.field"
           :disabled="disableFilter"
+          :context-target="contextTarget"
           class="dropdown--floating dropdown--tiny"
           @input="updateFilter(filter, { field: $event })"
+          @show="$emit('dropdownOpen')"
+          @hide="$emit('dropdownClosed')"
         >
           <DropdownItem
             v-for="field in fields"
@@ -65,8 +71,11 @@
         <Dropdown
           :disabled="disableFilter"
           :value="filter.type"
+          :context-target="contextTarget"
           class="dropdown--floating dropdown--tiny"
           @input="updateFilter(filter, { type: $event })"
+          @show="$emit('dropdownOpen')"
+          @hide="$emit('dropdownClosed')"
         >
           <DropdownItem
             v-for="fType in allowedFilters(filterTypes, fields, filter.field)"
@@ -135,6 +144,11 @@ export default {
     readOnly: {
       type: Boolean,
       required: true,
+    },
+    contextTarget: {
+      type: Object,
+      required: false,
+      default: null,
     },
   },
   computed: {

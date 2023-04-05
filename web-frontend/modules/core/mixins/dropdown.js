@@ -39,6 +39,13 @@ export default {
       required: false,
       default: 0,
     },
+    // the contextTarget is the element that will be used to set the direction of the dropdown
+    // The object should have a HTMLElement property providing the HTMLElement.
+    contextTarget: {
+      type: Object,
+      required: false,
+      default: null,
+    },
   },
   data() {
     return {
@@ -49,6 +56,7 @@ export default {
       query: '',
       hasItems: true,
       hover: null,
+      direction: 'bottom',
     }
   },
   computed: {
@@ -73,6 +81,11 @@ export default {
         // When the value changes we want to forcefully reload the selectName and
         // selectedIcon a little bit later because the children might have changed.
         this.forceRefreshSelectedValue()
+      })
+    },
+    open(isOpen) {
+      this.$nextTick(() => {
+        if (isOpen) this.setDropdownDirection()
       })
     },
   },
@@ -206,6 +219,7 @@ export default {
       // Make sure that all the items are visible the next time we open the dropdown.
       this.query = ''
       this.search(this.query)
+      this.direction = 'bottom' // Reset the direction to the default value.
 
       this.$el.clickOutsideEventCancel()
       document.body.removeEventListener('keydown', this.$el.keydownEvent)
@@ -362,6 +376,29 @@ export default {
       // In the case that the next item to scroll to is completely visible we simply
       // return the current scroll position so that no scrolling happens
       return this.$refs.items.scrollTop
+    },
+    setDropdownDirection() {
+      const dropdownHeight = this.$refs.dropdown.offsetHeight
+      const dropdownTop = this.$refs.dropdown.getBoundingClientRect().top
+
+      const canViewportBottom =
+        dropdownTop + dropdownHeight < window.innerHeight
+
+      !canViewportBottom
+        ? (this.direction = 'top')
+        : (this.direction = 'bottom')
+
+      if (this.contextTarget) {
+        const currentDirection = this.direction
+        const canTargetBottom =
+          dropdownTop + dropdownHeight <
+          this.contextTarget.HTMLElement.getBoundingClientRect().bottom
+
+        !canTargetBottom &&
+        this.contextTarget.HTMLElement.style.overflowY === 'hidden'
+          ? (this.direction = 'top')
+          : (this.direction = currentDirection)
+      }
     },
   },
 }

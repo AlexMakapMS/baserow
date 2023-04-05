@@ -18,15 +18,20 @@
     <Context
       ref="context"
       class="filters"
+      :overflow-y="contextOverflowY"
       :class="{ 'context--loading-overlay': view._.loading }"
     >
       <ViewFilterForm
+        ref="contextMain"
         class="filters_main"
         :fields="fields"
         :view="view"
         :read-only="readOnly"
         :disable-filter="disableFilter"
+        :context-target="contextTarget"
         @changed="$emit('changed')"
+        @dropdownOpen="handleDropdownOpen"
+        @dropdownClosed="contextOverflowY = 'auto'"
       />
 
       <template #footer>
@@ -74,6 +79,12 @@ export default {
       required: true,
     },
   },
+  data() {
+    return {
+      contextOverflowY: 'auto',
+      contextTarget: null,
+    }
+  },
   computed: {
     filterTypes() {
       return this.$registry.getAll('viewFilter')
@@ -94,7 +105,6 @@ export default {
     },
     async addFilter(values) {
       try {
-        console.log(this.fields)
         const field = this.getFirstCompatibleField(this.fields)
         if (field === undefined) {
           await this.$store.dispatch('notification/error', {
@@ -146,6 +156,19 @@ export default {
         .slice()
         .sort((a, b) => b.primary - a.primary)
         .find((field) => hasCompatibleFilterTypes(field, this.filterTypes))
+    },
+    handleDropdownOpen() {
+      const isContextContentHasScrollbar = this.isContextContentHasScrollbar()
+      if (isContextContentHasScrollbar) this.contextOverflowY = 'hidden'
+      else this.contextOverflowY = 'visible'
+
+      this.contextTarget = {
+        HTMLElement: this.$refs.contextMain.$el.parentElement,
+      }
+    },
+    isContextContentHasScrollbar() {
+      const contextMainEl = this.$refs.contextMain.$el.parentElement // get slot container element
+      return contextMainEl.scrollHeight > contextMainEl.clientHeight
     },
   },
 }

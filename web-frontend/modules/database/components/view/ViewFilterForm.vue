@@ -17,10 +17,13 @@
       :fields="fields"
       :view="view"
       :read-only="readOnly"
+      :context-target="contextTarget"
       class="filters__items"
       @deleteFilter="deleteFilter($event)"
       @updateFilter="updateFilter($event)"
       @selectOperator="updateView(view, { filter_type: $event })"
+      @dropdownOpen="$emit('dropdownOpen')"
+      @dropdownClosed="$emit('dropdownClosed')"
     />
   </div>
 </template>
@@ -50,6 +53,11 @@ export default {
     disableFilter: {
       type: Boolean,
       required: true,
+    },
+    contextTarget: {
+      type: Object,
+      required: false,
+      default: null,
     },
   },
   methods: {
