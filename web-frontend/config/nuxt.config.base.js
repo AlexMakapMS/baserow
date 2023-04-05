@@ -42,6 +42,7 @@ export default function (
         config.node = { fs: 'empty' }
       },
       babel: { compact: true },
+      transpile: ['axios'],
     },
   }
 }

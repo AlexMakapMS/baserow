@@ -1,4 +1,4 @@
-FROM node:16-bullseye as base
+FROM node:18-bullseye as base
 
 ARG UID
 ENV UID=${UID:-9999}
