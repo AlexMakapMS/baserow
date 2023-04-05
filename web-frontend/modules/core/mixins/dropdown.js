@@ -39,9 +39,10 @@ export default {
       required: false,
       default: 0,
     },
-    // the contextTarget is the element that will be used to set the direction of the dropdown
-    // The object should have a HTMLElement property providing the HTMLElement.
-    contextTarget: {
+    // The target is the element that will be used to set the direction of the dropdown
+    // The object must have HTMLElement property providing the target HTMLElement.
+    // If not provided the dropdown direction will be set relative to the viewport
+    target: {
       type: Object,
       required: false,
       default: null,
@@ -388,14 +389,13 @@ export default {
         ? (this.direction = 'top')
         : (this.direction = 'bottom')
 
-      if (this.contextTarget) {
+      if (this.target) {
         const currentDirection = this.direction
         const canTargetBottom =
           dropdownTop + dropdownHeight <
-          this.contextTarget.HTMLElement.getBoundingClientRect().bottom
+          this.target.HTMLElement.getBoundingClientRect().bottom
 
-        !canTargetBottom &&
-        this.contextTarget.HTMLElement.style.overflowY === 'hidden'
+        !canTargetBottom && this.target.HTMLElement.style.overflowY === 'hidden'
           ? (this.direction = 'top')
           : (this.direction = currentDirection)
       }

@@ -28,7 +28,7 @@
         :view="view"
         :read-only="readOnly"
         :disable-filter="disableFilter"
-        :context-target="contextTarget"
+        :dropdown-target="dropdownTarget"
         @changed="$emit('changed')"
         @dropdownOpen="handleDropdownOpen"
         @dropdownClosed="contextOverflowY = 'auto'"
@@ -82,7 +82,7 @@ export default {
   data() {
     return {
       contextOverflowY: 'auto',
-      contextTarget: null,
+      dropdownTarget: null,
     }
   },
   computed: {
@@ -158,16 +158,17 @@ export default {
         .find((field) => hasCompatibleFilterTypes(field, this.filterTypes))
     },
     handleDropdownOpen() {
-      const isContextContentHasScrollbar = this.isContextContentHasScrollbar()
-      if (isContextContentHasScrollbar) this.contextOverflowY = 'hidden'
-      else this.contextOverflowY = 'visible'
-
-      this.contextTarget = {
+      const hasScrollbar = this.isContextContentScrollable()
+      // let's hide the scrollbar if the context menu is scrollable
+      if (hasScrollbar) this.contextOverflowY = 'hidden'
+      // we dont want to see the context menu content overflow. dropdown direction will be set to 'top' if there is not enough space.
+      else this.contextOverflowY = 'visible' // overflow must be visible so the dropdown is not cut off.
+      this.dropdownTarget = {
         HTMLElement: this.$refs.contextMain.$el.parentElement,
       }
     },
-    isContextContentHasScrollbar() {
-      const contextMainEl = this.$refs.contextMain.$el.parentElement // get slot container element
+    isContextContentScrollable() {
+      const contextMainEl = this.$refs.contextMain.$el.parentElement // get main slot container element
       return contextMainEl.scrollHeight > contextMainEl.clientHeight
     },
   },

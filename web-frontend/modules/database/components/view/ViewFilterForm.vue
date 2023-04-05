@@ -17,7 +17,7 @@
       :fields="fields"
       :view="view"
       :read-only="readOnly"
-      :context-target="contextTarget"
+      :dropdown-target="dropdownTarget"
       class="filters__items"
       @deleteFilter="deleteFilter($event)"
       @updateFilter="updateFilter($event)"
@@ -54,7 +54,7 @@ export default {
       type: Boolean,
       required: true,
     },
-    contextTarget: {
+    dropdownTarget: {
       type: Object,
       required: false,
       default: null,

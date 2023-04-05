@@ -25,7 +25,7 @@
           v-if="index === 1 && !disableFilter"
           :value="filterType"
           :show-search="false"
-          :context-target="contextTarget"
+          :target="dropdownTarget"
           class="dropdown--floating dropdown--tiny"
           @input="selectBooleanOperator($event)"
           @show="$emit('dropdownOpen')"
@@ -52,7 +52,7 @@
         <Dropdown
           :value="filter.field"
           :disabled="disableFilter"
-          :context-target="contextTarget"
+          :target="dropdownTarget"
           class="dropdown--floating dropdown--tiny"
           @input="updateFilter(filter, { field: $event })"
           @show="$emit('dropdownOpen')"
@@ -71,7 +71,7 @@
         <Dropdown
           :disabled="disableFilter"
           :value="filter.type"
-          :context-target="contextTarget"
+          :target="dropdownTarget"
           class="dropdown--floating dropdown--tiny"
           @input="updateFilter(filter, { type: $event })"
           @show="$emit('dropdownOpen')"
@@ -145,7 +145,7 @@ export default {
       type: Boolean,
       required: true,
     },
-    contextTarget: {
+    dropdownTarget: {
       type: Object,
       required: false,
       default: null,
