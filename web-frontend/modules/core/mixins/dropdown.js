@@ -86,7 +86,15 @@ export default {
     },
     open(isOpen) {
       this.$nextTick(() => {
-        if (isOpen) this.setDropdownDirection()
+        switch (isOpen) {
+          case true:
+            if (this.target)
+              this.displayDropdownWithinTarget(
+                this.$refs.dropdown,
+                this.target.HTMLElement
+              )
+            else this.displayDropdownWithinViewport(this.$refs.dropdown)
+        }
       })
     },
   },
@@ -378,27 +386,60 @@ export default {
       // return the current scroll position so that no scrolling happens
       return this.$refs.items.scrollTop
     },
-    setDropdownDirection() {
-      const dropdownHeight = this.$refs.dropdown.offsetHeight
-      const dropdownTop = this.$refs.dropdown.getBoundingClientRect().top
-
+    displayDropdownWithinViewport(dropdownElement) {
+      const dropdownHeight = dropdownElement.offsetHeight
+      const dropdownTop = dropdownElement.getBoundingClientRect().top
       const canViewportBottom =
         dropdownTop + dropdownHeight < window.innerHeight
+      if (!canViewportBottom) this.direction = 'top'
+    },
+    displayDropdownWithinTarget(dropdownElement, targetElement) {
+      const dropdownHeight = dropdownElement.offsetHeight
+      const dropdownTop = dropdownElement.getBoundingClientRect().top
+      const canTargetBottom =
+        dropdownTop + dropdownHeight <
+        targetElement.getBoundingClientRect().bottom
+      const canTargetTop =
+        dropdownTop - dropdownHeight > targetElement.getBoundingClientRect().top
 
-      !canViewportBottom
-        ? (this.direction = 'top')
-        : (this.direction = 'bottom')
-
-      if (this.target) {
-        const currentDirection = this.direction
-        const canTargetBottom =
-          dropdownTop + dropdownHeight <
-          this.target.HTMLElement.getBoundingClientRect().bottom
-
-        !canTargetBottom && this.target.HTMLElement.style.overflowY === 'hidden'
-          ? (this.direction = 'top')
-          : (this.direction = currentDirection)
+      // in case the dropdown can't overflow the target
+      if (targetElement.style.overflowY === 'hidden') {
+        // let's check which direction is the best
+        this.handleDirectionInTarget(canTargetTop, canTargetBottom)
+      } else {
+        // in case the dropdown can overflow the target, it means we have to take care about viewport bounds instead
+        this.displayDropdownWithinViewport(dropdownElement)
       }
+    },
+    setMaxHeight(direction) {
+      if (direction === 'top') {
+        this.$refs.dropdown.style.maxHeight = `${
+          this.$refs.dropdown.getBoundingClientRect().top -
+          this.target.HTMLElement.getBoundingClientRect().top +
+          10
+        }px`
+      } else {
+        this.$refs.dropdown.style.maxHeight = `${
+          this.target.HTMLElement.getBoundingClientRect().bottom -
+          this.$refs.dropdown.getBoundingClientRect().top -
+          5
+        }px`
+      }
+    },
+    handleDirectionInTarget(canTop, canBottom) {
+      if (canTop && !canBottom) this.direction = 'top'
+      else if (canBottom && !canTop) this.direction = 'bottom'
+      else if ((canTop && canBottom) || (!canTop && !canBottom)) {
+        this.direction = this.getTheDirectionWithTheMostSpaceAvailableInTarget()
+        this.setMaxHeight(this.direction)
+      }
+    },
+    getTheDirectionWithTheMostSpaceAvailableInTarget() {
+      const target = this.target.HTMLElement.getBoundingClientRect()
+      const dropdown = this.$refs.dropdown.getBoundingClientRect()
+      const spaceAbove = dropdown.top - target.top
+      const spaceBelow = target.bottom - dropdown.top
+      return spaceAbove > spaceBelow ? 'top' : 'bottom'
     },
   },
 }

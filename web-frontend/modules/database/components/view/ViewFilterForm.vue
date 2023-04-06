@@ -22,8 +22,8 @@
       @deleteFilter="deleteFilter($event)"
       @updateFilter="updateFilter($event)"
       @selectOperator="updateView(view, { filter_type: $event })"
-      @dropdownOpen="$emit('dropdownOpen')"
-      @dropdownClosed="$emit('dropdownClosed')"
+      @dropdown-open="$emit('dropdown-open')"
+      @dropdown-closed="$emit('dropdown-closed')"
     />
   </div>
 </template>

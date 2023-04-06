@@ -1,6 +1,10 @@
 <template>
   <div class="context" :class="{ 'visibility-hidden': !open || !updatedOnce }">
-    <main ref="mainCointainer" class="context__main">
+    <main
+      ref="mainContainer"
+      class="context__main"
+      :style="{ 'overflow-y': overflowY }"
+    >
       <slot v-if="openedOnce"></slot>
     </main>
     <footer v-if="hasFooterSlot" class="context__footer">
@@ -27,14 +31,6 @@ export default {
       default: true,
       required: false,
     },
-    overflowY: {
-      type: String,
-      default: 'auto',
-      required: false,
-      validator(value) {
-        return ['auto', 'visible', 'hidden'].includes(value)
-      },
-    },
   },
   data() {
     return {
@@ -43,20 +39,13 @@ export default {
       updatedOnce: false,
       // If opened once, should stay in DOM to keep nested content
       openedOnce: false,
+      overflowY: 'auto',
     }
   },
   computed: {
     hasFooterSlot() {
       return !!this.$slots.footer
     },
-  },
-  watch: {
-    overflowY(value) {
-      this.setOverflowY(value)
-    },
-  },
-  mounted() {
-    this.setOverflowY('auto')
   },
   methods: {
     /**
@@ -431,8 +420,29 @@ export default {
       // edge doesn't come too close to the browser window
       this.$el.style.maxHeight = `calc(100vh - (${this.$el.offsetTop + 25}px)`
     },
-    setOverflowY() {
-      this.$refs.mainCointainer.style.overflowY = this.overflowY
+    isContentScrollable() {
+      console.log(this.$refs.mainContainer)
+      return (
+        this.$refs.mainContainer.scrollHeight >
+        this.$refs.mainContainer.clientHeight
+      )
+    },
+    toggleScroll() {
+      const isContentScrollable = this.isContentScrollable()
+      // disable scroll
+      if (this.overflowY === 'auto') {
+        switch (isContentScrollable) {
+          case true:
+            this.overflowY = 'hidden'
+            break
+          default:
+            this.overflowY = 'visible'
+            break
+        }
+      } else {
+        // enable scroll if needed
+        this.overflowY = 'auto'
+      }
     },
   },
 }

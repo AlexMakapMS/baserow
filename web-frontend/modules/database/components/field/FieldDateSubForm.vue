@@ -8,7 +8,8 @@
         <Dropdown
           v-model="values.date_format"
           :class="{ 'dropdown--error': $v.values.date_format.$error }"
-          @hide="$v.values.date_format.$touch()"
+          @show="$emit('dropdown-open')"
+          @hide="handleDropownClosed"
         >
           <DropdownItem
             :name="$t('fieldDateSubForm.dateFormatEuropean') + ' (20/02/2020)'"
@@ -217,6 +218,10 @@ export default {
       } else {
         this.values.date_force_timezone_offset = null
       }
+    },
+    handleDropownClosed() {
+      this.$v.values.date_format.$touch()
+      this.$emit('dropdown-closed')
     },
   },
   validations: {

@@ -28,8 +28,8 @@
           :target="dropdownTarget"
           class="dropdown--floating dropdown--tiny"
           @input="selectBooleanOperator($event)"
-          @show="$emit('dropdownOpen')"
-          @hide="$emit('dropdownClosed')"
+          @show="$emit('dropdown-open')"
+          @hide="$emit('dropdown-closed')"
         >
           <DropdownItem
             :name="$t('viewFilterContext.and')"
@@ -55,8 +55,8 @@
           :target="dropdownTarget"
           class="dropdown--floating dropdown--tiny"
           @input="updateFilter(filter, { field: $event })"
-          @show="$emit('dropdownOpen')"
-          @hide="$emit('dropdownClosed')"
+          @show="$emit('dropdown-open')"
+          @hide="$emit('dropdown-closed')"
         >
           <DropdownItem
             v-for="field in fields"
@@ -74,8 +74,8 @@
           :target="dropdownTarget"
           class="dropdown--floating dropdown--tiny"
           @input="updateFilter(filter, { type: $event })"
-          @show="$emit('dropdownOpen')"
-          @hide="$emit('dropdownClosed')"
+          @show="$emit('dropdown-open')"
+          @hide="$emit('dropdown-closed')"
         >
           <DropdownItem
             v-for="fType in allowedFilters(filterTypes, fields, filter.field)"

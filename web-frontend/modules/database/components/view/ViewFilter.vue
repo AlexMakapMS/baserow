@@ -30,8 +30,8 @@
         :disable-filter="disableFilter"
         :dropdown-target="dropdownTarget"
         @changed="$emit('changed')"
-        @dropdownOpen="handleDropdownOpen"
-        @dropdownClosed="contextOverflowY = 'auto'"
+        @dropdown-open="handleDropdownOpen"
+        @dropdown-closed="handleDropdownClosed"
       />
 
       <template #footer>
@@ -158,18 +158,13 @@ export default {
         .find((field) => hasCompatibleFilterTypes(field, this.filterTypes))
     },
     handleDropdownOpen() {
-      const hasScrollbar = this.isContextContentScrollable()
-      // let's hide the scrollbar if the context menu is scrollable
-      if (hasScrollbar) this.contextOverflowY = 'hidden'
-      // we dont want to see the context menu content overflow. dropdown direction will be set to 'top' if there is not enough space.
-      else this.contextOverflowY = 'visible' // overflow must be visible so the dropdown is not cut off.
+      this.$refs.context.toggleScroll()
       this.dropdownTarget = {
         HTMLElement: this.$refs.contextMain.$el.parentElement,
       }
     },
-    isContextContentScrollable() {
-      const contextMainEl = this.$refs.contextMain.$el.parentElement // get main slot container element
-      return contextMainEl.scrollHeight > contextMainEl.clientHeight
+    handleDropdownClosed() {
+      this.$refs.context.toggleScroll()
     },
   },
 }
