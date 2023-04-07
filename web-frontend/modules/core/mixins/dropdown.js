@@ -416,25 +416,25 @@ export default {
       const targetIsWindow = target === window
       if (direction === 'top' && !targetIsWindow) {
         this.$refs.dropdown.style.maxHeight = `${
-          this.$refs.dropdown.getBoundingClientRect().top -
+          this.$refs.dropdownSelected.getBoundingClientRect().top -
           this.target.HTMLElement.getBoundingClientRect().top +
           10
         }px`
       } else if (direction === 'bottom' && !targetIsWindow) {
         this.$refs.dropdown.style.maxHeight = `${
           this.target.HTMLElement.getBoundingClientRect().bottom -
-          this.$refs.dropdown.getBoundingClientRect().top -
-          5
+          this.$refs.dropdownSelected.getBoundingClientRect().top -
+          10
         }px`
       } else if (direction === 'top' && targetIsWindow) {
         this.$refs.dropdown.style.maxHeight = `${
-          this.$refs.dropdown.getBoundingClientRect().top - 0
+          this.$refs.dropdownSelected.getBoundingClientRect().bottom - 10
         }px`
       } else if (direction === 'bottom' && targetIsWindow) {
         this.$refs.dropdown.style.maxHeight = `${
           window.innerHeight -
-          this.$refs.dropdown.getBoundingClientRect().top -
-          5
+          this.$refs.dropdownSelected.getBoundingClientRect().top -
+          10
         }px`
       }
     },
