@@ -37,8 +37,11 @@
           <Dropdown
             :value="sort.field"
             :disabled="disableSort"
+            :target="dropdownTarget"
             class="dropdown--floating dropdown--tiny"
             @input="updateSort(sort, { field: $event })"
+            @show="$refs.context.toggleScroll()"
+            @hide="$refs.context.toggleScroll()"
           >
             <DropdownItem
               v-for="field in fields"
@@ -176,6 +179,7 @@ export default {
   data() {
     return {
       addOpen: false,
+      dropdownTarget: null,
     }
   },
   computed: {
@@ -185,6 +189,10 @@ export default {
     availableFieldsLength() {
       return this.fields.filter(this.getCanSortInView).length
     },
+  },
+  mounted() {
+    const contextContainerEl = this.$refs.context.getContainerElement()
+    this.dropdownTarget = { HTMLElement: contextContainerEl }
   },
   methods: {
     getCanSortInView(field) {
