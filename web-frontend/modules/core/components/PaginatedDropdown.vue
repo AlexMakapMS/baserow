@@ -9,9 +9,14 @@
     @focusin="show()"
     @focusout="focusout($event)"
   >
-    <a v-if="showInput" class="dropdown__selected" @click="show()">
+    <a
+      v-if="showInput"
+      ref="dropdownSelected"
+      class="dropdown__selected"
+      @click="show()"
+    >
       <template v-if="displayName !== null">
-        {{ displayName }} loooll
+        {{ displayName }}
       </template>
       <template v-else>{{
         notSelectedText === null ? $t('action.makeChoice') : notSelectedText
