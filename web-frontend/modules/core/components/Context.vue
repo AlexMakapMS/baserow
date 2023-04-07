@@ -421,7 +421,6 @@ export default {
       this.$el.style.maxHeight = `calc(100vh - (${this.$el.offsetTop + 25}px)`
     },
     isContentScrollable() {
-      console.log(this.$refs.mainContainer)
       return (
         this.$refs.mainContainer.scrollHeight >
         this.$refs.mainContainer.clientHeight
@@ -440,9 +439,12 @@ export default {
             break
         }
       } else {
-        // enable scroll if needed
+        // enable scroll
         this.overflowY = 'auto'
       }
+    },
+    getContainerElement() {
+      return this.$refs.mainContainer
     },
   },
 }

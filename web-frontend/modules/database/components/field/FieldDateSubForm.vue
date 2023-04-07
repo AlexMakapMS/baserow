@@ -8,8 +8,9 @@
         <Dropdown
           v-model="values.date_format"
           :class="{ 'dropdown--error': $v.values.date_format.$error }"
+          :target="dropdownTarget"
           @show="$emit('dropdown-open')"
-          @hide="handleDropownClosed"
+          @hide="handleDateFormatDropownClosed"
         >
           <DropdownItem
             :name="$t('fieldDateSubForm.dateFormatEuropean') + ' (20/02/2020)'"
@@ -38,7 +39,9 @@
           <div class="control__elements">
             <Dropdown
               v-model="values.date_time_format"
-              @hide="$v.values.date_time_format.$touch()"
+              :target="dropdownTarget"
+              @show="$emit('dropdown-open')"
+              @hide="handleDateTimeDropownClosed"
             >
               <DropdownItem
                 :name="$t('fieldDateSubForm.24Hour') + ' (23:00)'"
@@ -74,6 +77,9 @@
               :initial-display-name="defaultValues.date_force_timezone"
               :fetch-on-open="true"
               :debounce-time="100"
+              :target="dropdownTarget"
+              @show="$emit('dropdown-open')"
+              @hide="$emit('dropdown-closed')"
               @input="(timezone) => (values.date_force_timezone = timezone.id)"
             ></PaginatedDropdown>
           </div>
@@ -118,6 +124,13 @@ export default {
     PaginatedDropdown,
   },
   mixins: [form, fieldSubForm],
+  props: {
+    dropdownTarget: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+  },
   data() {
     return {
       allowedValues: [
@@ -219,8 +232,12 @@ export default {
         this.values.date_force_timezone_offset = null
       }
     },
-    handleDropownClosed() {
+    handleDateFormatDropownClosed() {
       this.$v.values.date_format.$touch()
+      this.$emit('dropdown-closed')
+    },
+    handleDateTimeDropownClosed() {
+      this.$v.values.date_time_format.$touch()
       this.$emit('dropdown-closed')
     },
   },

@@ -13,9 +13,11 @@
             <Dropdown
               v-model="values.through_field_id"
               :class="{ 'dropdown--error': $v.values.through_field_id.$error }"
-              @hide="$v.values.through_field_id.$touch()"
+              :target="dropdownTarget"
               @input="throughFieldSelected"
               @change="values.target_field_id = null"
+              @show="$emit('dropdown-open')"
+              @hide="handleThroughFieldDropownClosed"
             >
               <DropdownItem
                 v-for="field in linkRowFieldsInThisTable"
@@ -45,7 +47,9 @@
             <Dropdown
               v-model="values.target_field_id"
               :class="{ 'dropdown--error': $v.values.target_field_id.$error }"
-              @hide="$v.values.target_field_id.$touch()"
+              :target="dropdownTarget"
+              @show="$emit('dropdown-open')"
+              @hide="handleTargetFieldDropownClosed"
             >
               <DropdownItem
                 v-for="field in fieldsInThroughTable"
@@ -95,6 +99,13 @@ export default {
     FormulaTypeSubForms,
   },
   mixins: [form, fieldSubForm],
+  props: {
+    dropdownTarget: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+  },
   data() {
     return {
       allowedValues: ['through_field_id', 'target_field_id'],
@@ -252,6 +263,14 @@ export default {
     reset() {
       form.methods.reset.call(this)
       this.errorFromServer = null
+    },
+    handleThroughFieldDropownClosed() {
+      this.$v.values.through_field_id.$touch()
+      this.$emit('dropdown-closed')
+    },
+    handleTargetFieldDropownClosed() {
+      this.$v.values.target_field_id.$touch()
+      this.$emit('dropdown-closed')
     },
   },
 }

@@ -11,14 +11,21 @@
   >
     <a v-if="showInput" class="dropdown__selected" @click="show()">
       <template v-if="displayName !== null">
-        {{ displayName }}
+        {{ displayName }} loooll
       </template>
       <template v-else>{{
         notSelectedText === null ? $t('action.makeChoice') : notSelectedText
       }}</template>
       <i class="dropdown__toggle-icon fas fa-caret-down"></i>
     </a>
-    <div class="dropdown__items" :class="{ hidden: !open }">
+    <div
+      ref="dropdown"
+      class="dropdown__items"
+      :class="{
+        hidden: !open,
+        'dropdown__items--reverse': direction === 'top',
+      }"
+    >
       <div v-if="showSearch" class="select__search">
         <i class="select__search-icon fas fa-search"></i>
         <input
@@ -207,6 +214,7 @@ export default {
     hide() {
       this.open = false
       this.$emit('hide')
+      this.direction = 'bottom'
       this.$el.clickOutsideEventCancel()
       document.body.removeEventListener('keydown', this.$el.keydownEvent)
     },

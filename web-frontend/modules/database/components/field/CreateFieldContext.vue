@@ -12,8 +12,8 @@
       :dropdown-target="dropdownTarget"
       @submitted="submit"
       @keydown-enter="$refs.submitButton.focus()"
-      @dropdown-open="handleDropdownOpen"
-      @dropdown-closed="handleDropdownClosed"
+      @dropdown-open="$refs.context.toggleScroll()"
+      @dropdown-closed="$refs.context.toggleScroll()"
     >
     </FieldForm>
 
@@ -66,6 +66,11 @@ export default {
       contextOverflowY: 'auto',
     }
   },
+  mounted() {
+    this.dropdownTarget = {
+      HTMLElement: this.$refs.context.getContainerElement(),
+    }
+  },
   methods: {
     async submit(values) {
       this.loading = true
@@ -110,15 +115,6 @@ export default {
     },
     showFieldTypesDropdown(target) {
       this.$refs.form.showFieldTypesDropdown(target)
-    },
-    handleDropdownOpen() {
-      this.$refs.context.toggleScroll()
-      this.dropdownTarget = {
-        HTMLElement: this.$refs.form.$el.parentElement,
-      }
-    },
-    handleDropdownClosed() {
-      this.$refs.context.toggleScroll()
     },
   },
 }

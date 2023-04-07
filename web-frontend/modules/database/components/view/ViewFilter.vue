@@ -22,7 +22,6 @@
       :class="{ 'context--loading-overlay': view._.loading }"
     >
       <ViewFilterForm
-        ref="contextMain"
         class="filters_main"
         :fields="fields"
         :view="view"
@@ -30,8 +29,8 @@
         :disable-filter="disableFilter"
         :dropdown-target="dropdownTarget"
         @changed="$emit('changed')"
-        @dropdown-open="handleDropdownOpen"
-        @dropdown-closed="handleDropdownClosed"
+        @dropdown-open="$refs.context.toggleScroll()"
+        @dropdown-closed="$refs.context.toggleScroll()"
       />
 
       <template #footer>
@@ -89,6 +88,11 @@ export default {
     filterTypes() {
       return this.$registry.getAll('viewFilter')
     },
+  },
+  mounted() {
+    this.dropdownTarget = {
+      HTMLElement: this.$refs.context.getContainerElement(),
+    }
   },
   beforeMount() {
     this.$bus.$on('view-filter-created', this.filterCreated)
@@ -156,15 +160,6 @@ export default {
         .slice()
         .sort((a, b) => b.primary - a.primary)
         .find((field) => hasCompatibleFilterTypes(field, this.filterTypes))
-    },
-    handleDropdownOpen() {
-      this.$refs.context.toggleScroll()
-      this.dropdownTarget = {
-        HTMLElement: this.$refs.contextMain.$el.parentElement,
-      }
-    },
-    handleDropdownClosed() {
-      this.$refs.context.toggleScroll()
     },
   },
 }

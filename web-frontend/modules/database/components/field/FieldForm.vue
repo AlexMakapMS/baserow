@@ -77,6 +77,7 @@
         :field-type="values.type"
         :name="values.name"
         :default-values="defaultValues"
+        :dropdown-target="dropdownTarget"
         @validate="$v.$touch"
         @suggested-field-name="handleSuggestedFieldName($event)"
         @dropdown-open="$emit('dropdown-open')"
