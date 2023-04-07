@@ -27,22 +27,6 @@ exports[`ViewFilterForm component Default view filter component 1`] = `
   <div
     class="filters__items"
   />
-   
-  <div
-    class="filters_footer"
-  >
-    <a
-      class="filters__add"
-    >
-      <i
-        class="fas fa-plus"
-      />
-      
-      viewFilterContext.addFilter
-    </a>
-     
-    <!---->
-  </div>
 </div>
 `;
 
@@ -809,28 +793,6 @@ exports[`ViewFilterForm component Full view filter component 1`] = `
       </div>
     </div>
   </div>
-   
-  <div
-    class="filters_footer"
-  >
-    <a
-      class="filters__add"
-    >
-      <i
-        class="fas fa-plus"
-      />
-      
-      viewFilterContext.addFilter
-    </a>
-     
-    <div>
-      <div
-        class="switch switch--has-content"
-      >
-        viewFilterContext.disableAllFilters
-      </div>
-    </div>
-  </div>
 </div>
 `;
 
@@ -997,6 +959,7 @@ exports[`ViewFilterForm component Test rating filter 1`] = `
            
           <div
             class="dropdown__items"
+            style="max-height: 758px;"
           >
             <div
               class="select__search"
@@ -1136,28 +1099,6 @@ exports[`ViewFilterForm component Test rating filter 1`] = `
             />
           </div>
         </div>
-      </div>
-    </div>
-  </div>
-   
-  <div
-    class="filters_footer"
-  >
-    <a
-      class="filters__add"
-    >
-      <i
-        class="fas fa-plus"
-      />
-      
-      viewFilterContext.addFilter
-    </a>
-     
-    <div>
-      <div
-        class="switch switch--has-content"
-      >
-        viewFilterContext.disableAllFilters
       </div>
     </div>
   </div>
@@ -1327,6 +1268,7 @@ exports[`ViewFilterForm component Test rating filter 2`] = `
            
           <div
             class="dropdown__items hidden"
+            style="max-height: 758px;"
           >
             <div
               class="select__search"
@@ -1466,28 +1408,6 @@ exports[`ViewFilterForm component Test rating filter 2`] = `
             />
           </div>
         </div>
-      </div>
-    </div>
-  </div>
-   
-  <div
-    class="filters_footer"
-  >
-    <a
-      class="filters__add"
-    >
-      <i
-        class="fas fa-plus"
-      />
-      
-      viewFilterContext.addFilter
-    </a>
-     
-    <div>
-      <div
-        class="switch switch--has-content"
-      >
-        viewFilterContext.disableAllFilters
       </div>
     </div>
   </div>
