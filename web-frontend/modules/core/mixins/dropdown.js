@@ -389,56 +389,77 @@ export default {
     displayDropdownWithinViewport(dropdownElement) {
       const dropdownHeight = dropdownElement.offsetHeight
       const dropdownTop = dropdownElement.getBoundingClientRect().top
-      const canViewportBottom =
-        dropdownTop + dropdownHeight < window.innerHeight
-      if (!canViewportBottom) this.direction = 'top'
+      const canTop = dropdownTop + dropdownHeight > 0
+      const canBottom = dropdownTop + dropdownHeight < window.innerHeight
+
+      this.handleDirection(window, canTop, canBottom)
     },
     displayDropdownWithinTarget(dropdownElement, targetElement) {
       const dropdownHeight = dropdownElement.offsetHeight
       const dropdownTop = dropdownElement.getBoundingClientRect().top
-      const canTargetBottom =
+      const canBottom =
         dropdownTop + dropdownHeight <
         targetElement.getBoundingClientRect().bottom
-      const canTargetTop =
+      const canTop =
         dropdownTop - dropdownHeight > targetElement.getBoundingClientRect().top
 
       // in case the dropdown can't overflow the target
       if (targetElement.style.overflowY === 'hidden') {
         // let's check which direction is the best
-        this.handleDirectionInTarget(canTargetTop, canTargetBottom)
+        this.handleDirection(targetElement, canTop, canBottom)
       } else {
         // in case the dropdown can overflow the target, it means we have to take care about viewport bounds instead
         this.displayDropdownWithinViewport(dropdownElement)
       }
     },
-    setMaxHeight(direction) {
-      if (direction === 'top') {
+    setMaxHeight(target, direction) {
+      const targetIsWindow = target === window
+      if (direction === 'top' && !targetIsWindow) {
         this.$refs.dropdown.style.maxHeight = `${
           this.$refs.dropdown.getBoundingClientRect().top -
           this.target.HTMLElement.getBoundingClientRect().top +
           10
         }px`
-      } else {
+      } else if (direction === 'bottom' && !targetIsWindow) {
         this.$refs.dropdown.style.maxHeight = `${
           this.target.HTMLElement.getBoundingClientRect().bottom -
           this.$refs.dropdown.getBoundingClientRect().top -
           5
         }px`
+      } else if (direction === 'top' && targetIsWindow) {
+        this.$refs.dropdown.style.maxHeight = `${
+          this.$refs.dropdown.getBoundingClientRect().top - 0
+        }px`
+      } else if (direction === 'bottom' && targetIsWindow) {
+        this.$refs.dropdown.style.maxHeight = `${
+          window.innerHeight -
+          this.$refs.dropdown.getBoundingClientRect().top -
+          5
+        }px`
       }
     },
-    handleDirectionInTarget(canTop, canBottom) {
+    handleDirection(target, canTop, canBottom) {
       if (canTop && !canBottom) this.direction = 'top'
       else if (canBottom && !canTop) this.direction = 'bottom'
-      else if ((canTop && canBottom) || (!canTop && !canBottom)) {
-        this.direction = this.getTheDirectionWithTheMostSpaceAvailableInTarget()
-        this.setMaxHeight(this.direction)
-      }
+      else if ((canTop && canBottom) || (!canTop && !canBottom))
+        this.direction = this.getTheDirectionWithTheMostSpaceAvailable(target)
+
+      this.setMaxHeight(target, this.direction)
     },
-    getTheDirectionWithTheMostSpaceAvailableInTarget() {
-      const target = this.target.HTMLElement.getBoundingClientRect()
+    getTheDirectionWithTheMostSpaceAvailable(target) {
       const dropdown = this.$refs.dropdown.getBoundingClientRect()
-      const spaceAbove = dropdown.top - target.top
-      const spaceBelow = target.bottom - dropdown.top
+      let spaceAbove = 0
+      let spaceBelow = 0
+
+      if (target === window) {
+        spaceAbove = dropdown.top - 0
+        spaceBelow = window.innerHeight - dropdown.top
+      } else {
+        const targetElBounds = this.target.HTMLElement.getBoundingClientRect()
+        spaceAbove = dropdown.top - targetElBounds.top
+        spaceBelow = targetElBounds.bottom - dropdown.top
+      }
+
       return spaceAbove > spaceBelow ? 'top' : 'bottom'
     },
   },
