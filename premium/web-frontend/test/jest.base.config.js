@@ -2,8 +2,6 @@
 const esModules = ['@nuxtjs/i18n'].join('|')
 module.exports = {
   rootDir: '../../../../',
-  expand: true,
-  forceExit: true,
   moduleDirectories: ['<rootDir>/web-frontend/node_modules/'],
   modulePaths: ['<rootDir>/web-frontend/node_modules/'],
   moduleNameMapper: {
