@@ -97,7 +97,6 @@ describe('ViewFilterForm component', () => {
     listeners = {}
   ) => {
     props.disableFilter = false
-    console.log(props)
     const wrapper = await testApp.mount(ViewFilterForm, {
       propsData: props,
       listeners,
