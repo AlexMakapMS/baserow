@@ -355,7 +355,9 @@ export default {
     tableLoading(value) {
       if (!value) {
         this.$nextTick(() => {
+          console.log('a')
           this.checkHeaderOverflow()
+          console.log('b')
         })
       }
     },
@@ -460,7 +462,9 @@ export default {
         await event.callback()
       }
       this.$nextTick(() => {
+        console.log('a')
         this.viewLoading = false
+        console.log('b')
       })
     },
   },
