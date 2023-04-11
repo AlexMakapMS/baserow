@@ -12,7 +12,10 @@ module.exports = {
   },
   moduleFileExtensions: ['js', 'vue', 'json'],
   transform: {
-    '^.+\\.js$': ['babel-jest', { configFile: __dirname + '/../babel.config.js' }],
+    '^.+\\.js$': [
+      'babel-jest',
+      { configFile: __dirname + '/../babel.config.js' },
+    ],
     '.*\\.(vue)$': '<rootDir>/web-frontend/node_modules/@vue/vue2-jest',
     '^.+\\.svg$': '<rootDir>/web-frontend/test/helpers/stubSvgTransformer.js',
   },
