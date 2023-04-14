@@ -408,5 +408,13 @@
     "health": {
         "title": "Baserow health checks",
         "description": "These checks show the current status of your Baserow installation."
+    },
+    "emailTester": {
+        "title": "Email tester",
+        "targetEmailLabel": "Target Email",
+        "invalidTargetEmail": "Invalid email address",
+        "submit": "Send test email",
+        "success": "Successfully sent test email",
+        "configLink": "Email Configuration Help"
     }
 }

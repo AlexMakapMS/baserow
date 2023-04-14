@@ -41,14 +41,19 @@
           </div>
         </div>
       </div>
+      <div class="admin-health__group">
+        <EmailerTester></EmailerTester>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 import HealthService from '@baserow/modules/core/services/health'
+import EmailerTester from '@baserow/modules/core/components/health/EmailTester.vue'
 
 export default {
+  components: { EmailerTester },
   layout: 'app',
   middleware: 'staff',
   async asyncData({ app }) {
