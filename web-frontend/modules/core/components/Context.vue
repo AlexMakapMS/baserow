@@ -40,6 +40,8 @@ export default {
       // If opened once, should stay in DOM to keep nested content
       openedOnce: false,
       overflowY: 'auto',
+      isScrollable: false,
+      mutationObserver: null,
     }
   },
   computed: {
@@ -48,6 +50,26 @@ export default {
     },
   },
   methods: {
+    /** This method listen to the added/removed element dom element 
+      within the context main container, so we can check if 
+      the content is scrollable or not */
+    listenContentDomChanges() {
+      const targetNode = this.$refs.mainContainer
+      const observerOptions = {
+        childList: true,
+        subtree: true,
+      }
+      this.mutationObserver = new MutationObserver((mutationList, observer) => {
+        mutationList.forEach((mutation) => {
+          switch (mutation.type) {
+            case 'childList':
+              this.isScrollable = this.isContentScrollable()
+              break
+          }
+        })
+      })
+      this.mutationObserver.observe(targetNode, observerOptions)
+    },
     /**
      * Toggles the open state of the context menu.
      *
@@ -81,7 +103,7 @@ export default {
       }
 
       if (value) {
-        return this.show(
+        this.show(
           target,
           vertical,
           horizontal,
@@ -169,6 +191,10 @@ export default {
       window.addEventListener('resize', this.$el.updatePositionEvent)
 
       this.$emit('shown')
+
+      await this.$nextTick()
+      this.isScrollable = this.isContentScrollable()
+      this.listenContentDomChanges()
     },
     /**
      * Toggles context menu next to mouse when click event has happened
@@ -240,6 +266,7 @@ export default {
       ) {
         this.$el.cancelOnClickOutside()
       }
+      this.mutationObserver?.disconnect()
       window.removeEventListener('scroll', this.$el.updatePositionEvent, true)
       window.removeEventListener('resize', this.$el.updatePositionEvent)
     },
@@ -427,10 +454,9 @@ export default {
       )
     },
     toggleScroll() {
-      const isContentScrollable = this.isContentScrollable()
       // disable scroll
       if (this.overflowY === 'auto') {
-        switch (isContentScrollable) {
+        switch (this.isScrollable) {
           case true:
             this.overflowY = 'hidden'
             break
