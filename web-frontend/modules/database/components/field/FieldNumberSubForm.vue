@@ -77,7 +77,7 @@ export default {
     },
   },
   methods: {
-    handleDropownClosed() {
+    handleDropdownClosed() {
       this.$v.values.number_decimal_places.$touch()
       this.$emit('dropdown-closed')
     },
