@@ -82,10 +82,12 @@ export default {
   name: 'FieldRatingSubForm',
   components: { ColorSelectContext },
   mixins: [form, fieldSubForm],
-  dropdownTarget: {
-    type: Object,
-    required: false,
-    default: null,
+  props: {
+    dropdownTarget: {
+      type: Object,
+      required: false,
+      default: null,
+    },
   },
   data() {
     return {
