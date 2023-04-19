@@ -817,6 +817,10 @@ LOGGING = {
     },
 }
 
+BASEROW_AUTOINDEX_CONCURRENTLY = (
+    os.getenv("BASEROW_AUTOINDEX_CONCURRENTLY", "true") == "true"
+)
+
 
 # Now incorrectly named old variable, previously we would run `sync_templates` prior
 # to starting the gunicorn server in Docker. This variable would prevent that from

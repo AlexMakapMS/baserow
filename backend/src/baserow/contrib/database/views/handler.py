@@ -2,6 +2,7 @@ import re
 from collections import defaultdict
 from copy import deepcopy
 from dataclasses import dataclass
+import time
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Type, Union
 
 from django.conf import settings
@@ -9,8 +10,8 @@ from django.contrib.auth.models import AbstractUser, AnonymousUser
 from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.core.exceptions import FieldDoesNotExist, ValidationError
-from django.db import models as django_models
-from django.db.models import Count, F
+from django.db import connection, models as django_models, transaction
+from django.db.models import Count, F, Q
 from django.db.models.query import QuerySet
 
 import jwt
@@ -127,6 +128,9 @@ FieldOptionsDict = Dict[int, Dict[str, Any]]
 ending_number_regex = re.compile(r"(.+) (\d+)$")
 
 tracer = trace.get_tracer(__name__)
+
+
+AUTOINDEX_FEATURE_FLAG = "AUTOINDEX"
 
 
 class ViewHandler(metaclass=baserow_trace_methods(tracer)):
@@ -1289,6 +1293,9 @@ class ViewHandler(metaclass=baserow_trace_methods(tracer)):
 
         view_sort_created.send(self, view_sort=view_sort, user=user)
 
+        if AUTOINDEX_FEATURE_FLAG in settings.FEATURE_FLAGS:
+            self.update_view_index(view_sort.view)
+
         return view_sort
 
     def update_sort(
@@ -1363,6 +1370,9 @@ class ViewHandler(metaclass=baserow_trace_methods(tracer)):
 
         view_sort_updated.send(self, view_sort=view_sort, user=user)
 
+        if AUTOINDEX_FEATURE_FLAG in settings.FEATURE_FLAGS:
+            self.update_view_index(view_sort.view)
+
         return view_sort
 
     def delete_sort(self, user, view_sort):
@@ -1389,6 +1399,9 @@ class ViewHandler(metaclass=baserow_trace_methods(tracer)):
         view_sort_deleted.send(
             self, view_sort_id=view_sort_id, view_sort=view_sort, user=user
         )
+
+        if AUTOINDEX_FEATURE_FLAG in settings.FEATURE_FLAGS:
+            self.remove_view_index(view_sort.view)
 
     def create_decoration(
         self,
@@ -1676,6 +1689,41 @@ class ViewHandler(metaclass=baserow_trace_methods(tracer)):
         if search is not None:
             queryset = queryset.search_all_fields(search, only_search_by_field_ids)
         return queryset
+
+    def _get_view_model_and_index(self, view: View):
+        """
+        Returns the model and the best possible index for the requested view.
+
+        :param view: The view to get the model and index for.
+        :return: The model and the index.
+        """
+
+        queryset = self.get_queryset(view)
+        model = queryset.model
+        query = queryset.query
+        index_name = f"t{model.baserow_table_id}_v{view.pk}_idx"
+        return queryset.model, django_models.Index(
+            *query.order_by, condition=Q(trashed=False), name=index_name
+        )
+
+    def remove_view_index(self, view: View):
+        model, index = self._get_view_model_and_index(view)
+        with connection.schema_editor() as schema_editor:
+            schema_editor.remove_index(model, index)
+
+    def update_view_index(self, view: View):
+        if settings.BASEROW_AUTOINDEX_CONCURRENTLY:
+            from baserow.contrib.database.views.tasks import update_view_index
+
+            update_view_index.delay(view.pk)
+        else:
+            self._update_view_index(view)
+
+    def _update_view_index(self, view: View):
+        model, index = self._get_view_model_and_index(view)
+        with connection.schema_editor() as schema_editor:
+            schema_editor.remove_index(model, index)
+            schema_editor.add_index(model, index)
 
     def _get_aggregation_lock_cache_key(self, view: View):
         """
