@@ -1,23 +1,23 @@
 <template>
   <div class="link-element" :class="classes">
     <Button
-      v-if="variant === 'button'"
+      v-if="element.variant === 'button'"
       type="link"
       v-bind="extraAttr"
-      :target="target"
-      :full-width="width === 'full'"
+      :target="element.target"
+      :full-width="element.width === 'full'"
       @click.prevent=""
     >
-      {{ value || $t('linkElement.noValue') }}
+      {{ element.value || $t('linkElement.noValue') }}
     </Button>
     <a
       v-else
       class="link-element__link"
       v-bind="extraAttr"
-      :target="`_${target}`"
+      :target="`_${element.target}`"
       @click.prevent=""
     >
-      {{ value || $t('linkElement.noValue') }}
+      {{ element.value || $t('linkElement.noValue') }}
     </a>
   </div>
 </template>
@@ -30,18 +30,10 @@ export default {
   name: 'LinkElement',
   mixins: [textElement],
   props: {
-    // eslint-disable-next-line vue/prop-name-casing
-    navigation_type: { type: String, default: 'page' },
-    // eslint-disable-next-line vue/prop-name-casing
-    navigate_to_page_id: { type: Number, default: null },
-    // eslint-disable-next-line vue/prop-name-casing
-    page_parameters: { type: Array, default: () => [] },
-    // eslint-disable-next-line vue/prop-name-casing
-    navigate_to_url: { type: String, default: '' },
-    alignment: { type: String, default: 'left' },
-    variant: { type: String, default: 'link' },
-    target: { type: String, default: 'self' },
-    width: { type: String, default: 'auto' },
+    element: {
+      type: Object,
+      required: true,
+    },
     builder: { type: Object, required: true },
   },
   data() {
@@ -50,8 +42,8 @@ export default {
   computed: {
     classes() {
       return {
-        [`link-element--alignment-${this.alignment}`]: true,
-        'element--no-value': !this.value,
+        [`link-element--alignment-${this.element.alignment}`]: true,
+        'element--no-value': !this.element.value,
         'element--in-error': this.inError,
       }
     },
@@ -86,10 +78,10 @@ export default {
   methods: {
     updateUrl() {
       this.inError = false
-      if (this.navigation_type === 'page') {
-        if (!isNaN(this.navigate_to_page_id)) {
+      if (this.element.navigation_type === 'page') {
+        if (!isNaN(this.element.navigate_to_page_id)) {
           const page = this.builder.pages.find(
-            ({ id }) => id === this.navigate_to_page_id
+            ({ id }) => id === this.element.navigate_to_page_id
           )
 
           // The builder page list might be empty or the page has been deleted
@@ -100,7 +92,7 @@ export default {
 
           const toPath = compile(page.path, { encode: encodeURIComponent })
           const pageParams = Object.fromEntries(
-            this.page_parameters.map(({ name, value }) => [name, value])
+            this.element.page_parameters.map(({ name, value }) => [name, value])
           )
           try {
             this.url = toPath(pageParams)
@@ -110,7 +102,7 @@ export default {
           }
         }
       } else {
-        this.url = this.navigate_to_url
+        this.url = this.element.navigate_to_url
       }
     },
   },

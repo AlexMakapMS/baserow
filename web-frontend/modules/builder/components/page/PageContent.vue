@@ -4,7 +4,7 @@
       :is="getType(element).component"
       v-for="element in elements"
       :key="element.id"
-      v-bind="getType(element).getComponentProps(element)"
+      :element="element"
       class="element__component"
       :builder="builder"
       :mode="mode"

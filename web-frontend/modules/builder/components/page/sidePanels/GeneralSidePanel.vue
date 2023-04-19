@@ -3,8 +3,8 @@
     :is="elementType.formComponent"
     :key="element.id"
     ref="elementForm"
-    :builder="builder"
     class="element-form"
+    :builder="builder"
     :default-values="defaultValues"
     @values-changed="onChange($event)"
   />
@@ -36,7 +36,7 @@ export default {
     },
 
     defaultValues() {
-      return this.elementType.getComponentProps(this.element)
+      return this.element
     },
   },
   methods: {
@@ -44,12 +44,12 @@ export default {
       actionDebouncedUpdateSelectedElement: 'element/debouncedUpdateSelected',
     }),
     async onChange(newValues) {
-      const oldValues = this.elementType.getComponentProps(this.element)
+      const oldValues = this.element
       if (!_.isEqual(newValues, oldValues)) {
         try {
           await this.actionDebouncedUpdateSelectedElement({
-            // Here we clone the values to prevent "modification oustide
-            // of the store" error
+            // Here we clone the values to prevent
+            // "modification oustide of the store" error
             values: clone(newValues),
           })
         } catch (error) {

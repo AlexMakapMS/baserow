@@ -31,28 +31,6 @@ export class ElementType extends Registerable {
   get formComponent() {
     return null
   }
-
-  get properties() {
-    return []
-  }
-
-  /**
-   * Extracts the attributes of the element instance into attributes that the component
-   * can use. The returned object needs to be a mapping from the name of the property
-   * at the component level to the value in the element object.
-   *
-   * Example:
-   * - Let's say you have a prop called `level`
-   * - The element looks like this: { 'id': 'someId', 'level': 1 }
-   *
-   * Then you will have to return { 'level': element.level }
-   *
-   * @param element
-   * @returns {{}}
-   */
-  getComponentProps(element) {
-    return {}
-  }
 }
 
 export class HeadingElementType extends ElementType {
@@ -79,13 +57,6 @@ export class HeadingElementType extends ElementType {
   get formComponent() {
     return HeadingElementForm
   }
-
-  getComponentProps(element) {
-    return {
-      value: element.value,
-      level: element.level,
-    }
-  }
 }
 
 export class ParagraphElementType extends ElementType {
@@ -111,12 +82,6 @@ export class ParagraphElementType extends ElementType {
 
   get formComponent() {
     return ParagraphElementForm
-  }
-
-  getComponentProps(element) {
-    return {
-      value: element.value,
-    }
   }
 }
 
@@ -147,19 +112,5 @@ export class LinkElementType extends ElementType {
 
   get formComponent() {
     return LinkElementForm
-  }
-
-  getComponentProps(element) {
-    return {
-      value: element.value,
-      alignment: element.alignment,
-      variant: element.variant,
-      width: element.width,
-      target: element.target,
-      navigation_type: element.navigation_type,
-      navigate_to_page_id: element.navigate_to_page_id,
-      navigate_to_url: element.navigate_to_url,
-      page_parameters: element.page_parameters,
-    }
   }
 }
