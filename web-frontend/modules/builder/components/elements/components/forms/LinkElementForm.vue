@@ -20,10 +20,13 @@
       <div class="control__elements">
         <Dropdown v-model="navigateTo" :show-search="false">
           <template #value>
-            {{ destinationPage.name }}
-            <span class="link-element-form__navigate-option-page-path">
-              {{ destinationPage.path }}
-            </span>
+            <template v-if="destinationPage">
+              {{ destinationPage.name }}
+              <span class="link-element-form__navigate-option-page-path">
+                {{ destinationPage.path }}
+              </span></template
+            >
+            <span v-else>{{ $t('linkElementForm.navigateToCustom') }}</span>
           </template>
           <DropdownItem
             v-for="page in pages"
@@ -242,16 +245,16 @@ export default {
   },
   methods: {
     updatePageParameters() {
-      this.values.page_parameters = this.destinationPage.path_params.map(
-        ({ name }, index) => {
-          let value = ''
-          // Naive way to keep data when we change the destination page.
-          if (this.values.page_parameters[index]) {
-            value = this.values.page_parameters[index].value
-          }
-          return { name, value }
+      this.values.page_parameters = (
+        this.destinationPage?.path_params || []
+      ).map(({ name }, index) => {
+        let value = ''
+        // Naive way to keep data when we change the destination page.
+        if (this.values.page_parameters[index]) {
+          value = this.values.page_parameters[index].value
         }
-      )
+        return { name, value }
+      })
       this.parametersInError = false
     },
   },

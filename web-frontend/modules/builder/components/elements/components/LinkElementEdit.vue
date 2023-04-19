@@ -24,7 +24,7 @@
 
 <script>
 import textElement from '@baserow/modules/builder/mixins/elements/textElement'
-import { compile } from 'path-to-regexp'
+import { LinkElementType } from '@baserow/modules/builder/elementTypes'
 
 export default {
   name: 'LinkElement',
@@ -78,31 +78,11 @@ export default {
   methods: {
     updateUrl() {
       this.inError = false
-      if (this.element.navigation_type === 'page') {
-        if (!isNaN(this.element.navigate_to_page_id)) {
-          const page = this.builder.pages.find(
-            ({ id }) => id === this.element.navigate_to_page_id
-          )
-
-          // The builder page list might be empty or the page has been deleted
-          if (!page) {
-            this.url = ''
-            return
-          }
-
-          const toPath = compile(page.path, { encode: encodeURIComponent })
-          const pageParams = Object.fromEntries(
-            this.element.page_parameters.map(({ name, value }) => [name, value])
-          )
-          try {
-            this.url = toPath(pageParams)
-          } catch (e) {
-            this.inError = true
-            this.url = ''
-          }
-        }
-      } else {
-        this.url = this.element.navigate_to_url
+      try {
+        return LinkElementType.getUrlFromElement(this.element, this.builder)
+      } catch (e) {
+        this.inError = true
+        return ''
       }
     },
   },

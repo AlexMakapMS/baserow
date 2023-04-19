@@ -7,6 +7,8 @@ import ParagraphElementForm from '@baserow/modules/builder/components/elements/c
 import HeadingElementForm from '@baserow/modules/builder/components/elements/components/forms/HeadingElementForm'
 import LinkElementForm from '@baserow/modules/builder/components/elements/components/forms/LinkElementForm'
 
+import { compile } from 'path-to-regexp'
+
 export class ElementType extends Registerable {
   get name() {
     return null
@@ -112,5 +114,29 @@ export class LinkElementType extends ElementType {
 
   get formComponent() {
     return LinkElementForm
+  }
+
+  static getUrlFromElement(element, builder) {
+    if (element.navigation_type === 'page') {
+      if (!isNaN(element.navigate_to_page_id)) {
+        const page = builder.pages.find(
+          ({ id }) => id === element.navigate_to_page_id
+        )
+
+        // The builder page list might be empty or the page has been deleted
+        if (!page) {
+          return ''
+        }
+
+        const toPath = compile(page.path, { encode: encodeURIComponent })
+        const pageParams = Object.fromEntries(
+          element.page_parameters.map(({ name, value }) => [name, value])
+        )
+        return toPath(pageParams)
+      }
+    } else {
+      return element.navigate_to_url
+    }
+    return ''
   }
 }

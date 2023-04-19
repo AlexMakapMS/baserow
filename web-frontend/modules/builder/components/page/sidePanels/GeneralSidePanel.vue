@@ -19,10 +19,6 @@ import _ from 'lodash'
 export default {
   name: 'GeneralSidePanel',
   inject: ['builder'],
-  props: {},
-  data() {
-    return {}
-  },
   computed: {
     ...mapGetters({
       element: 'element/getSelected',
