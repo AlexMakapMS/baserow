@@ -1,8 +1,8 @@
-from hashlib import shake_128
 import re
 from collections import defaultdict
 from copy import deepcopy
 from dataclasses import dataclass
+from hashlib import shake_128
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Type, Union
 
 from django.conf import settings
@@ -10,7 +10,8 @@ from django.contrib.auth.models import AbstractUser, AnonymousUser
 from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.core.exceptions import FieldDoesNotExist, ValidationError
-from django.db import connection, models as django_models
+from django.db import connection
+from django.db import models as django_models
 from django.db.models import Count, F, Q
 from django.db.models.query import QuerySet
 

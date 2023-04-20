@@ -1,5 +1,7 @@
 from typing import Optional
+
 from django.db import transaction
+
 from baserow.config.celery import app
 
 
