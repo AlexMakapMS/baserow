@@ -34,6 +34,7 @@
             :store-prefix="storePrefix"
             :class="{ last: index == rows.length - 1 }"
             :parent-width="contextWidth"
+            @edit-row="$emit('edit-row', $event)"
           >
           </CalendarCard>
           <div v-if="error" class="calendar-month-day-expanded__try-again">

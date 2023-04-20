@@ -27,6 +27,7 @@
           :day="day"
           :fields="fields"
           :store-prefix="storePrefix"
+          @edit-row="$emit('edit-row', $event)"
         >
         </CalendarMonthDay>
       </ol>
@@ -194,6 +195,10 @@ export default {
     }
   },
   methods: {
+    clicked(e) {
+      console.log(e)
+      this.$emit('edit-row', e)
+    },
     selectDate(newSelectedDate) {
       // Set loading immediately so the overlay appears without waiting for the
       // debounce delay.

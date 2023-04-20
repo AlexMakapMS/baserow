@@ -18,6 +18,7 @@
         :row="row"
         :fields="fields"
         :store-prefix="storePrefix"
+        @edit-row="$emit('edit-row', $event)"
       >
       </CalendarCard>
     </div>
@@ -39,6 +40,7 @@
       :store-prefix="storePrefix"
       :parent-width="width"
       :parent-height="height"
+      @edit-row="$emit('edit-row', $event)"
     >
     </CalendarMonthDayExpanded>
   </li>
@@ -108,6 +110,9 @@ export default {
     window.removeEventListener('resize', this.updateVisibleRowsCount)
   },
   methods: {
+    clicked(row) {
+      this.$emit('edit-row', row)
+    },
     updateVisibleRowsCount() {
       const itemHeight = 28
       this.width = this.$refs.calendarMonthDay.clientWidth
