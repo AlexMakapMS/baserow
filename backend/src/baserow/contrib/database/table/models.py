@@ -1,4 +1,5 @@
 import itertools
+from contextlib import contextmanager
 import re
 from types import MethodType
 from typing import Any, Dict, Type, Union
@@ -54,7 +55,29 @@ deconstruct_filter_key_regex = re.compile(
 tracer = trace.get_tracer(__name__)
 
 
+@contextmanager
+def cachalot_enabled():
+    """
+    A context manager that enables cachalot for the duration of the context. This is
+    useful when you want to enable cachalot for a specific query but you don't want
+    to enable it globally.
+    Please note that the query have to be executed within the context of the context
+    manager in order for it to be cached.
+    """
+
+    from cachalot.api import LOCAL_STORAGE
+
+    was_enabled = getattr(LOCAL_STORAGE, "cachalot_enabled", False)
+    LOCAL_STORAGE.cachalot_enabled = True
+    yield
+    LOCAL_STORAGE.cachalot_enabled = was_enabled
+
+
 class TableModelQuerySet(models.QuerySet):
+    def count(self):
+        with cachalot_enabled():
+            return super().count()
+
     def enhance_by_fields(self):
         """
         Enhances the queryset based on the `enhance_queryset` for each field in the

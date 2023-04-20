@@ -103,6 +103,7 @@ django==3.2.18
     #   channels
     #   dj-database-url
     #   django-appconf
+    #   django-cachalot
     #   django-celery-beat
     #   django-celery-email
     #   django-cors-headers
@@ -114,6 +115,8 @@ django==3.2.18
     #   drf-spectacular
 django-appconf==1.0.5
     # via django-celery-email
+django-cachalot==2.5.3
+    # via -r base.in
 django-celery-beat==2.5.0
     # via -r base.in
 django-celery-email==3.0.0
