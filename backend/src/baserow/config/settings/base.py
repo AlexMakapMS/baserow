@@ -98,7 +98,8 @@ def patch_cachalot_for_baserow(baserow_table_name_prefix="database_table_"):
     models.
 
     `filter_cachable` and `is_cachable` are called to invalidate the cache when
-    a table is changed. `are_all_cachable` is called to check if a query can be
+    a table is changed.
+    `are_all_cachable` is called to check if a query can be
     cached.
     """
 
@@ -124,10 +125,11 @@ def patch_cachalot_for_baserow(baserow_table_name_prefix="database_table_"):
     def patched_are_all_cachable(tables):
         """
         This patch works because cachalot does not explicitly set this thread
-        local variable. It's only set by the context managers or it assumes to be
-        True by default. Since we are explicitly setting it to False or True in our
-        code, we can check if the value it's true and the database table is a
-        baserow table.
+        local variable, but it assumes to be True by default if CACHALOT_ENABLED
+        is not set otherwise. Since we are explicitly setting it to True in our
+        code for the query we want to cache, we can check if the value it's True
+        to remove our dynamic tables from the list of tables that cachalot will
+        check.
         """
 
         from cachalot.api import LOCAL_STORAGE
