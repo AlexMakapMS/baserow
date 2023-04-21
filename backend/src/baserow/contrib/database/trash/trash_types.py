@@ -489,6 +489,7 @@ class ViewTrashableItemType(TrashableItemType):
     def permanently_delete_item(
         self, trashed_item: View, trash_item_lookup_cache: Dict[str, View] = None
     ):
+        ViewHandler().remove_view_index_if_unused(trashed_item)
         trashed_item.delete()
 
     def get_parent(self, trashed_item: View, parent_id: int) -> Optional[View]:

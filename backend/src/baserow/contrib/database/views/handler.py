@@ -16,6 +16,7 @@ from django.db.models import Count, F, Q
 from django.db.models.query import QuerySet
 
 import jwt
+from loguru import logger
 from opentelemetry import trace
 from redis.exceptions import LockNotOwnedError
 
@@ -1262,6 +1263,8 @@ class ViewHandler(metaclass=baserow_trace_methods(tracer)):
             user, CreateViewSortOperationType.type, workspace=workspace, context=view
         )
 
+        previous_index_key = self._get_view_index_key(view)
+
         # Check if view supports sorting.
         view_type = view_type_registry.get_by_model(view.specific_class)
         if not view_type.can_sort:
@@ -1295,7 +1298,9 @@ class ViewHandler(metaclass=baserow_trace_methods(tracer)):
         view_sort_created.send(self, view_sort=view_sort, user=user)
 
         if AUTOINDEX_FEATURE_FLAG in settings.FEATURE_FLAGS:
-            self.update_view_index(view_sort.view)
+            self.update_view_index(
+                view_sort.view, previous_view_index_key=previous_index_key
+            )
 
         return view_sort
 
@@ -1397,15 +1402,16 @@ class ViewHandler(metaclass=baserow_trace_methods(tracer)):
             context=view_sort,
         )
 
+        view = view_sort.view
         view_sort_id = view_sort.id
+        previous_view_index_key = self._get_view_index_key(view)
         view_sort.delete()
 
         view_sort_deleted.send(
             self, view_sort_id=view_sort_id, view_sort=view_sort, user=user
         )
 
-        if AUTOINDEX_FEATURE_FLAG in settings.FEATURE_FLAGS:
-            self.remove_view_index_if_unused(view_sort.view)
+        self._update_view_index(view, previous_view_index_key=previous_view_index_key)
 
     def create_decoration(
         self,
@@ -1694,7 +1700,7 @@ class ViewHandler(metaclass=baserow_trace_methods(tracer)):
             queryset = queryset.search_all_fields(search, only_search_by_field_ids)
         return queryset
 
-    def _get_view_index_key(self, view: View) -> str:
+    def _get_view_index_key(self, view: View) -> Optional[str]:
         """
         Returns a key for the provided view based on the fields used for sorting.
         View sharing the same key will have the same index name, so that the
@@ -1704,21 +1710,24 @@ class ViewHandler(metaclass=baserow_trace_methods(tracer)):
         :return: The index key.
         """
 
-        index_key = "-".join(
-            [f"{vs.field_id}:{vs.order}" for vs in view.viewsort_set.all()]
-        )
-        return f't{view.table_id}_{shake_128(index_key.encode("utf-8")).hexdigest(10)}'
+        qs = view.viewsort_set
+        if not qs.exists():
+            return None
+
+        index_key = "-".join([f"{vs.field_id}:{vs.order}" for vs in qs.all()])
+        index_key_digest = shake_128(index_key.encode("utf-8")).hexdigest(10)
+        return f"t{view.table_id}_{index_key_digest}"
 
     def _get_view_index_key_usage_count(
-        self, index_key: str, view: View, excluding_view: bool = False
+        self, view: View, index_key: str, excluding_view: bool = False
     ) -> int:
         """
         Returns the number of views that share the provided index key. This is
         useful to determine if the very same index is already used by another
         view or if no view is using the index anymore.
 
-        :param index_key: The index key to get the usage count for.
         :param view: The view to get the index key for.
+        :param index_key: The index key to get the usage count for.
         :param excluding_view: If True, the provided view will be excluded from
             the count.
         :return: The number of views that share the provided index key.
@@ -1738,19 +1747,24 @@ class ViewHandler(metaclass=baserow_trace_methods(tracer)):
 
         return count
 
-    def _get_view_index(self, view: View, model: GeneratedTableModel):
+    def _get_view_index(
+        self, view: View, model: GeneratedTableModel
+    ) -> Optional[django_models.Index]:
         """
         Returns the model and the best possible index for the requested view.
 
         :param view: The view to get the model and index for.
         :param model: The table model for which the view index should be
             generated.
-        :return: The model and the index.
+        :return: The index for view or none.
         """
 
         queryset = self.get_queryset(view, model=model)
         query = queryset.query
         index_name = self._get_view_index_key(view)
+
+        if index_name is None:
+            return None
 
         return django_models.Index(
             *query.order_by, condition=Q(trashed=False), name=index_name
@@ -1767,7 +1781,7 @@ class ViewHandler(metaclass=baserow_trace_methods(tracer)):
         index = self._get_view_index(view, model)
 
         index_usage_count = self._get_view_index_key_usage_count(
-            index.name, view, excluding_view=True
+            view, index.name, excluding_view=True
         )
         if index_usage_count > 0:
             return
@@ -1814,29 +1828,34 @@ class ViewHandler(metaclass=baserow_trace_methods(tracer)):
         model = view.table.get_model()
         index = self._get_view_index(view, model)
 
-        if index.name == previous_view_index_key:
+        # nothing to do if the index has the same hash
+        if index and index.name == previous_view_index_key:
             return
 
         with connection.schema_editor() as schema_editor:
-            # create the new index if it doesn't exist yet
-            new_index_usage_count = self._get_view_index_key_usage_count(
-                index.name, view, excluding_view=True
+            need_to_create_new_index = (
+                index is not None
+                and self._get_view_index_key_usage_count(
+                    view, index.name, excluding_view=True
+                )
+                == 0
             )
-            if new_index_usage_count == 0:
+            if need_to_create_new_index:
                 schema_editor.add_index(model, index)
 
             # remove the previous index if it is not used anymore
             old_index_will_be_unused = (
                 previous_view_index_key
                 and self._get_view_index_key_usage_count(
-                    previous_view_index_key, view, excluding_view=True
+                    view, previous_view_index_key, excluding_view=True
                 )
                 == 0
             )
-
             if old_index_will_be_unused:
-                index.name = previous_view_index_key
-                schema_editor.remove_index(model, index)
+                # Drop index SQL just need a name, but Django requires a field
+                # field name as well for the Index object, so we just use the id.
+                prev_index = django_models.Index("id", name=previous_view_index_key)
+                schema_editor.remove_index(model, prev_index)
 
     def _get_aggregation_lock_cache_key(self, view: View):
         """

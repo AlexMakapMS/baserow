@@ -2,6 +2,8 @@ from decimal import Decimal
 from unittest.mock import patch
 
 from django.core.exceptions import ValidationError
+from django.db import ProgrammingError, connection
+from django.test import override_settings
 
 import pytest
 
@@ -2756,3 +2758,142 @@ def test_order_views_ownership_type(data_fixture):
 
     with pytest.raises(ViewNotInTable):
         handler.order_views(user, table, [view2.id])
+
+
+def does_index_exists_in_db(index_name):
+    with connection.cursor() as cursor:
+        try:
+            cursor.execute(
+                "select * from pg_indexes where indexname = %s", [index_name]
+            )
+            return cursor.fetchone() is not None
+        except ProgrammingError:
+            return False
+
+
+@override_settings(BASEROW_AUTOINDEX_CONCURRENTLY=False)
+@pytest.mark.django_db
+def test_creating_view_sort_creates_a_new_index(data_fixture):
+    user = data_fixture.create_user()
+    table = data_fixture.create_database_table(user=user)
+    text_field = data_fixture.create_text_field(user=user, table=table)
+    handler = ViewHandler()
+    grid_view = handler.create_view(
+        user=user,
+        table=table,
+        type_name="grid",
+        name="Test grid",
+        ownership_type=OWNERSHIP_TYPE_COLLABORATIVE,
+    )
+
+    # without any sort the index key should be None
+    index_key = handler._get_view_index_key(grid_view)
+    assert index_key is None
+
+    # after creating a sort the index key should be set and the index should be
+    # created in the database.
+    handler.create_sort(user=user, view=grid_view, field=text_field, order="ASC")
+
+    index_key = handler._get_view_index_key(grid_view)
+    assert handler._get_view_index_key_usage_count(grid_view, index_key) == 1
+    assert does_index_exists_in_db(index_key) is True
+
+
+@override_settings(BASEROW_AUTOINDEX_CONCURRENTLY=False)
+@pytest.mark.django_db
+def test_updating_view_sorts_creates_a_new_index_and_delete_the_unused_one(
+    data_fixture,
+):
+    user = data_fixture.create_user()
+    table = data_fixture.create_database_table(user=user)
+    text_field = data_fixture.create_text_field(user=user, table=table)
+    number_field = data_fixture.create_number_field(user=user, table=table)
+    handler = ViewHandler()
+    grid_view = handler.create_view(
+        user=user,
+        table=table,
+        type_name="grid",
+        name="Test grid",
+        ownership_type=OWNERSHIP_TYPE_COLLABORATIVE,
+    )
+
+    # creating a view_sort should create a new index.
+    view_sort_1 = handler.create_sort(
+        user=user, view=grid_view, field=text_field, order="ASC"
+    )
+    initial_index_key_1 = handler._get_view_index_key(grid_view)
+    assert handler._get_view_index_key_usage_count(grid_view, initial_index_key_1) == 1
+    assert does_index_exists_in_db(initial_index_key_1) is True
+
+    # Adding a new view_sort should create a new index and delete the previous one.
+    view_sort_2 = handler.create_sort(
+        user=user, view=grid_view, field=number_field, order="ASC"
+    )
+    assert handler._get_view_index_key_usage_count(grid_view, initial_index_key_1) == 0
+    assert does_index_exists_in_db(initial_index_key_1) is False
+
+    initial_index_key_2 = handler._get_view_index_key(grid_view)
+    assert handler._get_view_index_key_usage_count(grid_view, initial_index_key_2) == 1
+    assert does_index_exists_in_db(initial_index_key_2) is True
+
+    # updating the sort should create a new index and delete the previous one.
+    handler.update_sort(user, view_sort_1, field=text_field, order="DESC")
+    assert handler._get_view_index_key_usage_count(grid_view, initial_index_key_2) == 0
+    assert does_index_exists_in_db(initial_index_key_2) is False
+
+    index_key = handler._get_view_index_key(grid_view)
+    assert handler._get_view_index_key_usage_count(grid_view, index_key) == 1
+    assert does_index_exists_in_db(index_key) is True
+
+    # removing the first view_sort should create a new index and delete the previous one.
+    handler.delete_sort(user, view_sort_2)
+    assert handler._get_view_index_key_usage_count(grid_view, index_key) == 0
+    assert does_index_exists_in_db(index_key) is False
+
+    index_key_2 = handler._get_view_index_key(grid_view)
+    assert handler._get_view_index_key_usage_count(grid_view, index_key_2) == 1
+    assert does_index_exists_in_db(index_key_2) is True
+
+    # deleting the last view_sort should delete the last index.
+    handler.delete_sort(user, view_sort_1)
+    index_key_none = handler._get_view_index_key(grid_view)
+    assert index_key_none is None
+
+    assert handler._get_view_index_key_usage_count(grid_view, index_key_2) == 0
+    assert does_index_exists_in_db(index_key_2) is False
+
+
+@override_settings(BASEROW_AUTOINDEX_CONCURRENTLY=False)
+@pytest.mark.django_db
+def test_perm_deleting_view_remove_index_if_unused(data_fixture):
+    user = data_fixture.create_user()
+    table = data_fixture.create_database_table(user=user)
+    text_field = data_fixture.create_text_field(user=user, table=table)
+    handler = ViewHandler()
+    grid_view = handler.create_view(
+        user=user,
+        table=table,
+        type_name="grid",
+        name="Test grid",
+        ownership_type=OWNERSHIP_TYPE_COLLABORATIVE,
+    )
+    handler.create_sort(user=user, view=grid_view, field=text_field, order="ASC")
+
+    # duplicate the view with the same sorting
+    grid_view_2 = handler.duplicate_view(user, grid_view)
+
+    index_key = handler._get_view_index_key(grid_view)
+    assert handler._get_view_index_key_usage_count(grid_view, index_key) == 2
+
+    # permanently delete the second view is not going to delete the index because
+    # it is still used by the first view.
+    trash_handler = TrashHandler()
+    trash_handler.permanently_delete(grid_view_2)
+
+    assert handler._get_view_index_key_usage_count(grid_view, index_key) == 1
+    assert does_index_exists_in_db(index_key) is True
+
+    # permanently delete the first view is going to delete the index because
+    # it is not used anymore.
+    trash_handler.permanently_delete(grid_view)
+    assert does_index_exists_in_db(index_key) is False
