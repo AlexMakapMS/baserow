@@ -2845,7 +2845,8 @@ def test_updating_view_sorts_creates_a_new_index_and_delete_the_unused_one(
     assert handler._get_view_index_key_usage_count(grid_view, index_key) == 1
     assert does_index_exists_in_db(index_key) is True
 
-    # removing the first view_sort should create a new index and delete the previous one.
+    # removing the first view_sort should create a new index and delete the
+    # previous one.
     handler.delete_sort(user, view_sort_2)
     assert handler._get_view_index_key_usage_count(grid_view, index_key) == 0
     assert does_index_exists_in_db(index_key) is False

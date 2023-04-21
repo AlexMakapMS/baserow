@@ -16,7 +16,6 @@ from django.db.models import Count, F, Q
 from django.db.models.query import QuerySet
 
 import jwt
-from loguru import logger
 from opentelemetry import trace
 from redis.exceptions import LockNotOwnedError
 
