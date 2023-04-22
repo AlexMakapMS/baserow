@@ -1,11 +1,13 @@
 from datetime import datetime
 from decimal import Decimal
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
+from django.conf import settings
 from django.db import models
 from django.utils.timezone import make_aware, utc
 
 import pytest
+from freezegun import freeze_time
 
 from baserow.contrib.database.fields.exceptions import (
     FilterFieldNotFound,
@@ -17,6 +19,7 @@ from baserow.contrib.database.views.exceptions import (
     ViewFilterTypeDoesNotExist,
     ViewFilterTypeNotAllowedForField,
 )
+from baserow.core.exceptions import InstanceTypeAlreadyRegistered
 
 
 @pytest.mark.django_db
@@ -839,3 +842,64 @@ def test_table_hierarchy(data_fixture):
     row = table_model.objects.create()
     assert row.get_parent() == table
     assert row.get_root() == workspace
+
+
+@patch("django.core.cache.cache.set_many")
+@pytest.mark.django_db(transaction=True)
+def test_cachalot_cache_table_model_count_and_invalidate_it_correctly(
+    mock_cache, data_fixture, django_assert_max_num_queries
+):
+    # install the cachalot app
+    from django.apps import apps
+
+    settings.INSTALLED_APPS = ["cachalot", *settings.INSTALLED_APPS]
+    apps.app_configs = {}
+    apps.apps_ready = apps.models_ready = apps.loading = apps.ready = False
+    apps.clear_cache()
+    try:
+        apps.populate(settings.INSTALLED_APPS)
+    except InstanceTypeAlreadyRegistered:
+        pass
+
+    user = data_fixture.create_user()
+    workspace = data_fixture.create_workspace(user=user)
+    app = data_fixture.create_database_application(workspace=workspace, name="Test 1")
+    table = data_fixture.create_database_table(name="Cars", database=app)
+
+    table_model = table.get_model()
+    row = table_model.objects.create()
+
+    mock_cache_call_count = mock_cache.call_count
+
+    # listing items should not be cached
+    with django_assert_max_num_queries(1):
+        assert [r.id for r in table_model.objects.all()] == [row.id]
+
+    assert mock_cache.call_count == mock_cache_call_count
+
+    # count() should save the result of the query in the cache
+    with freeze_time("2023-04-21"), django_assert_max_num_queries(1):
+        assert table_model.objects.count() == 1
+
+    assert mock_cache.call_count == mock_cache_call_count + 1
+
+    # this is how cachalot saves the count in the cache
+    expected_cache_entry = {
+        "c6486b7335e22af8377afb8c44ddebe8993b1c68": 1682035200.0,
+        "a5390e1dee02c00f4b0e1978062204cc93902ed2": (1682035200.0, (1,)),
+    }
+    assert (
+        mock_cache.call_args_list[mock_cache_call_count][0][0] == expected_cache_entry
+    )
+    # creating a new row should invalidate the cache result
+    table_model.objects.create()
+
+    mock_cache_call_count = mock_cache.call_count
+    with freeze_time("2023-04-21"), django_assert_max_num_queries(1):
+        assert table_model.objects.count() == 2
+
+    assert mock_cache.call_count == mock_cache_call_count + 1
+    # this is how cachalot saves the count in the cache
+    assert (
+        mock_cache.call_args_list[mock_cache_call_count][0][0] == expected_cache_entry
+    )
