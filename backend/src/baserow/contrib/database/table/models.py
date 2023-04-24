@@ -1,6 +1,6 @@
 import itertools
-from contextlib import contextmanager
 import re
+from contextlib import contextmanager
 from types import MethodType
 from typing import Any, Dict, Type, Union
 

@@ -866,40 +866,58 @@ def test_cachalot_cache_table_model_count_and_invalidate_it_correctly(
     app = data_fixture.create_database_application(workspace=workspace, name="Test 1")
     table = data_fixture.create_database_table(name="Cars", database=app)
 
-    table_model = table.get_model()
-    row = table_model.objects.create()
+    with freeze_time("2023-04-21 12:00:00"):
+        table_model = table.get_model()
+        row = table_model.objects.create()
 
     mock_cache_call_count = mock_cache.call_count
+    # get the table hash key
+    table_hash_key, invalidation_timestamp = list(
+        mock_cache.call_args_list[mock_cache_call_count - 1][0][0].items()
+    )[0]
 
-    # listing items should not be cached
+    # listing items should not cache the result
     with django_assert_max_num_queries(1):
         assert [r.id for r in table_model.objects.all()] == [row.id]
 
+    # nothing has been added to the cache since the number of calls did not change
     assert mock_cache.call_count == mock_cache_call_count
 
-    # count() should save the result of the query in the cache
-    with freeze_time("2023-04-21"), django_assert_max_num_queries(1):
-        assert table_model.objects.count() == 1
+    def assert_cachalot_cache_queryset_count_of(expected_count):
+        mock_cache_call_count = mock_cache.call_count
+        # count() should save the result of the query in the cache
+        with django_assert_max_num_queries(1):
+            assert table_model.objects.count() == expected_count
 
-    assert mock_cache.call_count == mock_cache_call_count + 1
+        # something has been added to the cache since the number of calls changed
+        assert mock_cache.call_count == mock_cache_call_count + 1
 
-    # this is how cachalot saves the count in the cache
-    expected_cache_entry = {
-        "c6486b7335e22af8377afb8c44ddebe8993b1c68": 1682035200.0,
-        "a5390e1dee02c00f4b0e1978062204cc93902ed2": (1682035200.0, (1,)),
-    }
-    assert (
-        mock_cache.call_args_list[mock_cache_call_count][0][0] == expected_cache_entry
-    )
+        # take the last inserted entry and verify values are what we expect
+        # (the key of the dict use the table id so it might change)
+        inserted_cache_entry = mock_cache.call_args_list[mock_cache_call_count][0][
+            0
+        ].copy()
+        assert isinstance(inserted_cache_entry, dict)
+        inserted_timestamp = inserted_cache_entry.pop(table_hash_key)
+        assert inserted_timestamp > invalidation_timestamp
+        assert list(inserted_cache_entry.values()) == [
+            (inserted_timestamp, (expected_count,))
+        ]
+
+    with freeze_time("2023-04-21 12:01:00"):
+        assert_cachalot_cache_queryset_count_of(1)
+
     # creating a new row should invalidate the cache result
-    table_model.objects.create()
+    with freeze_time("2023-04-21 12:02:00"):
+        mock_cache_call_count = mock_cache.call_count
 
-    mock_cache_call_count = mock_cache.call_count
-    with freeze_time("2023-04-21"), django_assert_max_num_queries(1):
-        assert table_model.objects.count() == 2
+        table_model.objects.create()
 
-    assert mock_cache.call_count == mock_cache_call_count + 1
-    # this is how cachalot saves the count in the cache
-    assert (
-        mock_cache.call_args_list[mock_cache_call_count][0][0] == expected_cache_entry
-    )
+        assert mock_cache.call_count == mock_cache_call_count + 1
+        # the table invalidation timestamp should have been updated
+        invalidation_timestamp = mock_cache.call_args_list[mock_cache_call_count][0][0][
+            table_hash_key
+        ]
+
+    with freeze_time("2023-04-21 12:03:00"):
+        assert_cachalot_cache_queryset_count_of(2)

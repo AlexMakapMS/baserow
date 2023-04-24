@@ -14,7 +14,7 @@ import dj_database_url
 from celery.schedules import crontab
 from corsheaders.defaults import default_headers
 
-from baserow.patch import patch_cachalot_for_baserow
+from baserow.patches import patch_cachalot_for_baserow
 from baserow.version import VERSION
 
 # A comma separated list of feature flags used to enable in-progress or not ready
