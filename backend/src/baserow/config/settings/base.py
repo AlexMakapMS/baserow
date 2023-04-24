@@ -69,7 +69,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "cachalot",
     "rest_framework",
     "rest_framework_simplejwt",
     "corsheaders",
@@ -87,31 +86,35 @@ INSTALLED_APPS = [
     *BASEROW_BUILT_IN_PLUGINS,
 ]
 
+AUTO_INDEX_VIEW_ENABLED = "auto-index-view" in FEATURE_FLAGS
 
-patch_cachalot_for_baserow()
+if AUTO_INDEX_VIEW_ENABLED:
+    INSTALLED_APPS.append("cachalot")
 
-CACHALOT_ENABLED = os.getenv("BASEROW_CACHALOT_ENABLED", "true") == "true"
-BASEROW_CACHALOT_ONLY_CACHABLE_TABLES = os.getenv(
-    "BASEROW_CACHALOT_ONLY_CACHABLE_TABLES", None
-)
+    patch_cachalot_for_baserow()
 
-# Please avoid to add tables with more than 50 modifications per minute to this
-# list, as described here:
-# https://django-cachalot.readthedocs.io/en/latest/limits.html
-if BASEROW_CACHALOT_ONLY_CACHABLE_TABLES is None:
-    CACHALOT_ONLY_CACHABLE_TABLES = [
-        "auth_user",
-        "core_settings",
-        "core_userprofile",
-        "database_token",
-        "database_tokenpermission",
-        "baserow_premium_license",
-        "baserow_premium_licenseuser",
-    ]
-else:
-    CACHALOT_ONLY_CACHABLE_TABLES = BASEROW_CACHALOT_ONLY_CACHABLE_TABLES.split(",")
+    CACHALOT_ENABLED = os.getenv("BASEROW_CACHALOT_ENABLED", "true") == "true"
+    BASEROW_CACHALOT_ONLY_CACHABLE_TABLES = os.getenv(
+        "BASEROW_CACHALOT_ONLY_CACHABLE_TABLES", None
+    )
 
-CACHALOT_TIMEOUT = int(os.getenv("BASEROW_CACHALOT_TIMEOUT", 60 * 60 * 24 * 7))
+    # Please avoid to add tables with more than 50 modifications per minute to this
+    # list, as described here:
+    # https://django-cachalot.readthedocs.io/en/latest/limits.html
+    if BASEROW_CACHALOT_ONLY_CACHABLE_TABLES is None:
+        CACHALOT_ONLY_CACHABLE_TABLES = [
+            "auth_user",
+            "core_settings",
+            "core_userprofile",
+            "database_token",
+            "database_tokenpermission",
+            "baserow_premium_license",
+            "baserow_premium_licenseuser",
+        ]
+    else:
+        CACHALOT_ONLY_CACHABLE_TABLES = BASEROW_CACHALOT_ONLY_CACHABLE_TABLES.split(",")
+
+    CACHALOT_TIMEOUT = int(os.getenv("BASEROW_CACHALOT_TIMEOUT", 60 * 60 * 24 * 7))
 
 
 if "builder" in FEATURE_FLAGS:
@@ -846,8 +849,8 @@ LOGGING = {
     },
 }
 
-BASEROW_AUTOINDEX_CONCURRENTLY = (
-    os.getenv("BASEROW_AUTOINDEX_CONCURRENTLY", "true") == "true"
+BASEROW_ADD_INDEX_CONCURRENTLY = (
+    os.getenv("BASEROW_ADD_INDEX_CONCURRENTLY", "true") == "true"
 )
 
 

@@ -43,4 +43,6 @@ CACHES = {
 # using redis and it will cause errors when running the tests.
 # Look into tests.baserow.api.test_api_utils.py if you need to test the throttle
 REST_FRAMEWORK["DEFAULT_THROTTLE_CLASSES"] = []  # noqa: F405
+
+# By default remove cachalot from the installed apps to avoid issues with cache.
 INSTALLED_APPS = [app for app in INSTALLED_APPS if app != "cachalot"]  # noqa: F405

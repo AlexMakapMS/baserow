@@ -131,9 +131,6 @@ ending_number_regex = re.compile(r"(.+) (\d+)$")
 tracer = trace.get_tracer(__name__)
 
 
-AUTOINDEX_FEATURE_FLAG = "AUTOINDEX"
-
-
 class ViewHandler(metaclass=baserow_trace_methods(tracer)):
     PUBLIC_VIEW_TOKEN_ALGORITHM = "HS256"  # nosec
 
@@ -1296,7 +1293,7 @@ class ViewHandler(metaclass=baserow_trace_methods(tracer)):
 
         view_sort_created.send(self, view_sort=view_sort, user=user)
 
-        if AUTOINDEX_FEATURE_FLAG in settings.FEATURE_FLAGS:
+        if settings.AUTO_INDEX_VIEW_ENABLED:
             self.update_view_index(
                 view_sort.view, previous_view_index_key=previous_index_key
             )
@@ -1376,7 +1373,7 @@ class ViewHandler(metaclass=baserow_trace_methods(tracer)):
 
         view_sort_updated.send(self, view_sort=view_sort, user=user)
 
-        if AUTOINDEX_FEATURE_FLAG in settings.FEATURE_FLAGS:
+        if settings.AUTO_INDEX_VIEW_ENABLED:
             self.update_view_index(
                 view_sort.view, previous_view_index_key=previous_view_index_key
             )
@@ -1794,7 +1791,7 @@ class ViewHandler(metaclass=baserow_trace_methods(tracer)):
         """
         Create the new index for the provided view if needed. If the
         previous_view_index_key is provided and it's not used by any other view
-        then it will be removed. IF BASEROW_AUTOINDEX_CONCURRENTLY is True then
+        then it will be removed. If BASEROW_ADD_INDEX_CONCURRENTLY is True then
         the index will be updated in a background celery task, otherwise it will
         be updated synchronously.
 
@@ -1804,7 +1801,7 @@ class ViewHandler(metaclass=baserow_trace_methods(tracer)):
             index will be removed.
         """
 
-        if settings.BASEROW_AUTOINDEX_CONCURRENTLY:
+        if settings.BASEROW_ADD_INDEX_CONCURRENTLY:
             from baserow.contrib.database.views.tasks import update_view_index
 
             update_view_index.delay(view.pk, previous_view_index_key)

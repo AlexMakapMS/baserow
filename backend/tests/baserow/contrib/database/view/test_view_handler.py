@@ -2771,7 +2771,7 @@ def does_index_exists_in_db(index_name):
             return False
 
 
-@override_settings(BASEROW_AUTOINDEX_CONCURRENTLY=False)
+@override_settings(BASEROW_ADD_INDEX_CONCURRENTLY=False)
 @pytest.mark.django_db
 def test_creating_view_sort_creates_a_new_index(data_fixture):
     user = data_fixture.create_user()
@@ -2799,7 +2799,7 @@ def test_creating_view_sort_creates_a_new_index(data_fixture):
     assert does_index_exists_in_db(index_key) is True
 
 
-@override_settings(BASEROW_AUTOINDEX_CONCURRENTLY=False)
+@override_settings(BASEROW_ADD_INDEX_CONCURRENTLY=False)
 @pytest.mark.django_db
 def test_updating_view_sorts_creates_a_new_index_and_delete_the_unused_one(
     data_fixture,
@@ -2864,7 +2864,7 @@ def test_updating_view_sorts_creates_a_new_index_and_delete_the_unused_one(
     assert does_index_exists_in_db(index_key_2) is False
 
 
-@override_settings(BASEROW_AUTOINDEX_CONCURRENTLY=False)
+@override_settings(BASEROW_ADD_INDEX_CONCURRENTLY=False)
 @pytest.mark.django_db
 def test_perm_deleting_view_remove_index_if_unused(data_fixture):
     user = data_fixture.create_user()
