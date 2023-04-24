@@ -1,4 +1,6 @@
 import secrets
+from hashlib import shake_128
+from typing import TYPE_CHECKING, Optional
 
 from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth.models import User
@@ -26,6 +28,9 @@ from baserow.core.mixins import (
 )
 from baserow.core.models import UserFile
 from baserow.core.utils import get_model_reference_field_name
+
+if TYPE_CHECKING:
+    from baserow.contrib.database.table.models import GeneratedTableModel
 
 FILTER_TYPES = ((FILTER_TYPE_AND, "And"), (FILTER_TYPE_OR, "Or"))
 
@@ -171,6 +176,54 @@ class View(
         if not self.public_view_has_password:
             return True
         return check_password(password, self.public_view_password)
+
+    def get_db_index_name(self) -> Optional[str]:
+        """
+        Returns a key for the provided view based on the fields used for sorting.
+        View sharing the same key will have the same index name, so that the
+        index can be reused.
+
+        :param view: The view to get the index key for.
+        :return: The index key.
+        """
+
+        view_sorts = self.viewsort_set
+        if not view_sorts.exists():
+            return None
+
+        index_key = "-".join([f"{vs.field_id}:{vs.order}" for vs in view_sorts.all()])
+        index_key_digest = shake_128(index_key.encode("utf-8")).hexdigest(10)
+        return f"{self.table.get_per_view_index_name_prefix()}{index_key_digest}"
+
+    def get_db_index(
+        self,
+        index_name: Optional[str] = None,
+        model: Optional["GeneratedTableModel"] = None,
+    ) -> Optional[models.Index]:
+        """
+        Returns the model and the best possible index for the requested view.
+
+        :param view: The view to get the model and index for.
+        :param model: The table model for which the view index should be
+            generated.
+        :return: The index for view or none.
+        """
+
+        # TODO: should we move the `handler.get_queryset` logic to a
+        # models.Manager?
+        from .handler import ViewHandler
+
+        handler = ViewHandler()
+        queryset = handler.get_queryset(self, model=model)
+        query = queryset.query
+        index_name = index_name or self.get_db_index_name()
+
+        if index_name is None:
+            return None
+
+        return models.Index(
+            *query.order_by, condition=Q(trashed=False), name=index_name
+        )
 
     class Meta:
         ordering = ("order",)

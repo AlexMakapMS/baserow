@@ -1,13 +1,14 @@
 import itertools
 import re
+from collections import defaultdict
 from contextlib import contextmanager
 from types import MethodType
-from typing import Any, Dict, Type, Union
+from typing import Any, Dict, List, Optional, Type, Union
 
 from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import FieldDoesNotExist as DjangoFieldDoesNotExist
-from django.db import models
+from django.db import connection, models
 from django.db.models import F, JSONField, Q, QuerySet
 
 from loguru import logger
@@ -31,6 +32,7 @@ from baserow.contrib.database.table.cache import (
     set_cached_model_field_attrs,
 )
 from baserow.contrib.database.views.exceptions import ViewFilterTypeNotAllowedForField
+from baserow.contrib.database.views.models import View
 from baserow.contrib.database.views.registries import view_filter_type_registry
 from baserow.core.db import specific_iterator
 from baserow.core.jobs.mixins import (
@@ -508,6 +510,87 @@ class Table(
 
     def get_database_table_name(self):
         return f"{self.USER_TABLE_DATABASE_NAME_PREFIX}{self.id}"
+
+    def get_existing_index_names(self) -> List[str]:
+        """
+        Returns a list of index names that already exist on the table.
+
+        :return: A list of index names that already exist on the table.
+        """
+
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT indexname FROM pg_indexes WHERE tablename = %s",
+                [self.get_database_table_name()],
+            )
+            return [idx_name for (idx_name,) in cursor.fetchall()]
+
+    def get_per_view_index_name_view_mapping(self) -> Dict[str, List[View]]:
+        """
+        Returns a mapping of per view index names to the views that they are
+        associated with.
+
+        :return: A mapping of per view index names to the views that they are
+            associated with.
+        """
+
+        views = self.view_set.prefetch_related("viewsort_set").all()
+
+        view_counts = defaultdict(list)
+        for view in views:
+            idx_name = view.get_db_index_name()
+            view_counts[idx_name].append(view)
+
+        return view_counts
+
+    def get_per_view_index_name_prefix(self) -> str:
+        """
+        Returns the prefix for per view indexes. Please not use this prefix to
+        create your own indexes as they will be removed by the
+        update_per_view_indexes.
+        """
+
+        return f"i{self.pk}:"
+
+    def update_per_view_indexes(self, model: Optional[GeneratedTableModel] = None):
+        """
+        Updates the per view indexes for the table. This will remove any indexes that
+        are no longer required and add any indexes that are required but do not exist.
+
+        :param model: The model to use for the table. If not provided the model will
+            be generated.
+        """
+
+        per_view_indexes = self.get_per_view_index_name_view_mapping()
+        per_view_index_names_set = set(per_view_indexes.keys())
+        per_view_index_prefix = self.get_per_view_index_name_prefix()
+        views_related_existing_index_names = [
+            idx_name
+            for idx_name in self.get_existing_index_names()
+            if idx_name.startswith(per_view_index_prefix)
+        ]
+        views_related_existing_index_names_set = set(views_related_existing_index_names)
+
+        indexes_to_add = (
+            per_view_index_names_set - views_related_existing_index_names_set
+        )
+        indexes_to_remove = (
+            views_related_existing_index_names_set - per_view_index_names_set
+        )
+        table_model = model or self.get_model()
+        with connection.schema_editor() as schema_editor:
+            for index_name in indexes_to_add:
+                view = per_view_indexes[index_name][0]
+                db_index = view.get_db_index(index_name, table_model)
+                if db_index is None:
+                    continue
+                schema_editor.add_index(table_model, db_index)
+
+            for index_name in indexes_to_remove:
+                # We need to create a fake index object with the correct name to
+                # be able to remove it.
+                db_index = models.Index("id", name=index_name)
+                schema_editor.remove_index(table_model, db_index)
 
     @baserow_trace(tracer)
     def get_model(

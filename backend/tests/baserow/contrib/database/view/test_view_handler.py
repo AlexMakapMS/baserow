@@ -2787,15 +2787,14 @@ def test_creating_view_sort_creates_a_new_index(data_fixture):
     )
 
     # without any sort the index key should be None
-    index_key = handler._get_view_index_key(grid_view)
+    index_key = grid_view.get_db_index_name()
     assert index_key is None
 
     # after creating a sort the index key should be set and the index should be
     # created in the database.
     handler.create_sort(user=user, view=grid_view, field=text_field, order="ASC")
+    index_key = grid_view.get_db_index_name()
 
-    index_key = handler._get_view_index_key(grid_view)
-    assert handler._get_view_index_key_usage_count(grid_view, index_key) == 1
     assert does_index_exists_in_db(index_key) is True
 
 
@@ -2821,46 +2820,38 @@ def test_updating_view_sorts_creates_a_new_index_and_delete_the_unused_one(
     view_sort_1 = handler.create_sort(
         user=user, view=grid_view, field=text_field, order="ASC"
     )
-    initial_index_key_1 = handler._get_view_index_key(grid_view)
-    assert handler._get_view_index_key_usage_count(grid_view, initial_index_key_1) == 1
+    initial_index_key_1 = grid_view.get_db_index_name()
     assert does_index_exists_in_db(initial_index_key_1) is True
 
     # Adding a new view_sort should create a new index and delete the previous one.
     view_sort_2 = handler.create_sort(
         user=user, view=grid_view, field=number_field, order="ASC"
     )
-    assert handler._get_view_index_key_usage_count(grid_view, initial_index_key_1) == 0
     assert does_index_exists_in_db(initial_index_key_1) is False
 
-    initial_index_key_2 = handler._get_view_index_key(grid_view)
-    assert handler._get_view_index_key_usage_count(grid_view, initial_index_key_2) == 1
+    initial_index_key_2 = grid_view.get_db_index_name()
     assert does_index_exists_in_db(initial_index_key_2) is True
 
     # updating the sort should create a new index and delete the previous one.
     handler.update_sort(user, view_sort_1, field=text_field, order="DESC")
-    assert handler._get_view_index_key_usage_count(grid_view, initial_index_key_2) == 0
     assert does_index_exists_in_db(initial_index_key_2) is False
 
-    index_key = handler._get_view_index_key(grid_view)
-    assert handler._get_view_index_key_usage_count(grid_view, index_key) == 1
+    index_key = grid_view.get_db_index_name()
     assert does_index_exists_in_db(index_key) is True
 
     # removing the first view_sort should create a new index and delete the
     # previous one.
     handler.delete_sort(user, view_sort_2)
-    assert handler._get_view_index_key_usage_count(grid_view, index_key) == 0
     assert does_index_exists_in_db(index_key) is False
 
-    index_key_2 = handler._get_view_index_key(grid_view)
-    assert handler._get_view_index_key_usage_count(grid_view, index_key_2) == 1
+    index_key_2 = grid_view.get_db_index_name()
     assert does_index_exists_in_db(index_key_2) is True
 
     # deleting the last view_sort should delete the last index.
     handler.delete_sort(user, view_sort_1)
-    index_key_none = handler._get_view_index_key(grid_view)
+    index_key_none = grid_view.get_db_index_name()
     assert index_key_none is None
 
-    assert handler._get_view_index_key_usage_count(grid_view, index_key_2) == 0
     assert does_index_exists_in_db(index_key_2) is False
 
 
@@ -2882,16 +2873,13 @@ def test_perm_deleting_view_remove_index_if_unused(data_fixture):
 
     # duplicate the view with the same sorting
     grid_view_2 = handler.duplicate_view(user, grid_view)
-
-    index_key = handler._get_view_index_key(grid_view)
-    assert handler._get_view_index_key_usage_count(grid_view, index_key) == 2
+    index_key = grid_view.get_db_index_name()
 
     # permanently delete the second view is not going to delete the index because
     # it is still used by the first view.
     trash_handler = TrashHandler()
     trash_handler.permanently_delete(grid_view_2)
 
-    assert handler._get_view_index_key_usage_count(grid_view, index_key) == 1
     assert does_index_exists_in_db(index_key) is True
 
     # permanently delete the first view is going to delete the index because
