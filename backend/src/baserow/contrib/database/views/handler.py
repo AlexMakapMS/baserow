@@ -1289,9 +1289,6 @@ class ViewHandler(metaclass=baserow_trace_methods(tracer)):
 
         view_sort_created.send(self, view_sort=view_sort, user=user)
 
-        if settings.AUTO_INDEX_VIEW_ENABLED:
-            self.update_view_index(view_sort.view)
-
         return view_sort
 
     def update_sort(
@@ -1366,9 +1363,6 @@ class ViewHandler(metaclass=baserow_trace_methods(tracer)):
 
         view_sort_updated.send(self, view_sort=view_sort, user=user)
 
-        if settings.AUTO_INDEX_VIEW_ENABLED:
-            self.update_view_index(view_sort.view)
-
         return view_sort
 
     def delete_sort(self, user, view_sort):
@@ -1389,15 +1383,12 @@ class ViewHandler(metaclass=baserow_trace_methods(tracer)):
             context=view_sort,
         )
 
-        view = view_sort.view
         view_sort_id = view_sort.id
         view_sort.delete()
 
         view_sort_deleted.send(
             self, view_sort_id=view_sort_id, view_sort=view_sort, user=user
         )
-
-        self.update_view_index(view)
 
     def create_decoration(
         self,
@@ -1685,24 +1676,6 @@ class ViewHandler(metaclass=baserow_trace_methods(tracer)):
         if search is not None:
             queryset = queryset.search_all_fields(search, only_search_by_field_ids)
         return queryset
-
-    def update_view_index(self, view: View):
-        """
-        Create the new index for the provided view if needed. If the
-        previous_view_index_key is provided and it's not used by any other view
-        then it will be removed. If BASEROW_ADD_INDEX_CONCURRENTLY is True then
-        the index will be updated in a background celery task, otherwise it will
-        be updated synchronously.
-
-        :param view: The view for which the index should be updated.
-        """
-
-        if settings.BASEROW_ADD_INDEX_CONCURRENTLY:
-            from baserow.contrib.database.views.tasks import update_per_view_indexes
-
-            update_per_view_indexes.delay(view.table_id)
-        else:
-            view.table.update_per_view_indexes()
 
     def _get_aggregation_lock_cache_key(self, view: View):
         """

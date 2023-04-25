@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.dispatch import Signal, receiver
 
 from baserow.contrib.database.fields import signals as field_signals
@@ -41,3 +42,27 @@ def field_deleted(sender, field, **kwargs):
         decorator_value_provider_type
     ) in decorator_value_provider_type_registry.get_all():
         decorator_value_provider_type.after_field_delete(field)
+
+
+if settings.AUTO_INDEX_VIEW_ENABLED:
+
+    def schedule_update_per_view_indexes(sender, view, **kwargs):
+        if settings.BASEROW_ADD_INDEX_CONCURRENTLY:
+            from baserow.contrib.database.table.tasks import update_per_view_indexes
+
+            update_per_view_indexes.delay(view.table_id)
+        else:
+            view.table.update_per_view_indexes()
+
+    def update_indexes_on_view_sort_change(sender, view_sort, **kwargs):
+        schedule_update_per_view_indexes(sender, view_sort.view, **kwargs)
+
+    update_indexes_on_view_sort_created = receiver(view_sort_created)(
+        update_indexes_on_view_sort_change
+    )
+    update_indexes_on_view_sort_updated = receiver(view_sort_updated)(
+        update_indexes_on_view_sort_change
+    )
+    update_indexes_on_view_sort_deleted = receiver(view_sort_deleted)(
+        update_indexes_on_view_sort_change
+    )

@@ -685,7 +685,6 @@ class DatabaseConfig(AppConfig):
         pre_migrate.connect(clear_generated_model_cache_receiver, sender=self)
 
         import baserow.contrib.database.fields.tasks  # noqa: F401
-        import baserow.contrib.database.views.tasks  # noqa: F401
 
 
 # noinspection PyPep8Naming

@@ -552,7 +552,9 @@ class Table(
 
         return f"i{self.pk}:"
 
-    def update_per_view_indexes(self, model: Optional[GeneratedTableModel] = None):
+    def update_per_view_indexes(
+        self, model: Optional[GeneratedTableModel] = None, concurrently=False
+    ):
         """
         Updates the per view indexes for the table. This will remove any indexes that
         are no longer required and add any indexes that are required but do not exist.
@@ -584,13 +586,16 @@ class Table(
                 db_index = view.get_db_index(index_name, table_model)
                 if db_index is None:
                     continue
-                schema_editor.add_index(table_model, db_index)
+                schema_editor.add_index(
+                    table_model, db_index, concurrently=concurrently
+                )
 
             for index_name in indexes_to_remove:
                 # We need to create a fake index object with the correct name to
                 # be able to remove it.
                 db_index = models.Index("id", name=index_name)
                 schema_editor.remove_index(table_model, db_index)
+        return per_view_indexes, indexes_to_add, indexes_to_remove
 
     @baserow_trace(tracer)
     def get_model(
