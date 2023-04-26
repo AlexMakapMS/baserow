@@ -1,6 +1,6 @@
 <template>
-  <Context ref="context" class="sortings">
-    <div>
+  <Context ref="context">
+    <div class="sortings">
       <div v-if="view.sortings.length === 0" class="sortings__none">
         <div class="sortings__none-title">
           {{ $t('viewSortContext.noSortTitle') }}
@@ -116,7 +116,11 @@
           </a>
         </div>
       </div>
-      <template
+    </div>
+
+    <template #footer>
+      <div
+        class="sortings_footer"
         v-if="view.sortings.length < availableFieldsLength && !disableSort"
       >
         <a
@@ -146,8 +150,8 @@
             </li>
           </ul>
         </Context>
-      </template>
-    </div>
+      </div>
+    </template>
   </Context>
 </template>
 
