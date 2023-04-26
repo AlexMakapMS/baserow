@@ -112,7 +112,6 @@ class LinkElementType(BaseTextElementType):
     def serializer_field_names(self):
         return super().serializer_field_names + [
             "navigation_type",
-            "navigate_to_page",
             "navigate_to_page_id",
             "navigate_to_url",
             "page_parameters",
@@ -126,7 +125,6 @@ class LinkElementType(BaseTextElementType):
     def allowed_fields(self):
         return super().allowed_fields + [
             "navigation_type",
-            "navigate_to_page",
             "navigate_to_page_id",
             "navigate_to_url",
             "page_parameters",
