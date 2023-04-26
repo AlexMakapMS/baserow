@@ -39,11 +39,16 @@
 
   &::before,
   &::after {
-    content: "";
+    content: '';
     display: block;
     height: 10px;
     width: 100%;
   }
+}
+
+.select__items--noscroll {
+  max-height: none;
+  overflow-y: hidden;
 }
 
 .select__items--expanded {
@@ -85,7 +90,7 @@
   }
 
   &.select__item--loading::before {
-    content: " ";
+    content: ' ';
 
     @include loading(14px);
     @include absolute(9px, 9px, auto, auto);
@@ -241,7 +246,7 @@
     padding-left: 6px;
   }
 
-  &:nth-child(2n+1) {
+  &:nth-child(2n + 1) {
     margin-right: 20px;
   }
 

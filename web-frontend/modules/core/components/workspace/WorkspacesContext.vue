@@ -15,7 +15,7 @@
     <ul
       v-if="!isLoading && isLoaded && workspaces.length > 0"
       v-auto-overflow-scroll
-      class="select__items"
+      class="select__items select__items--noscroll"
     >
       <WorkspacesContextItem
         v-for="workspace in searchAndSort(workspaces)"
