@@ -50,8 +50,8 @@ export default {
     },
   },
   methods: {
-    /** This method listen to the added/removed element dom element 
-      within the context main container, so we can check if 
+    /** This method listen to the added/removed element dom element
+      within the context main container, so we can check if
       the content is scrollable or not */
     listenContentDomChanges() {
       const targetNode = this.$refs.mainContainer
