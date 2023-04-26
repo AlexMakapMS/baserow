@@ -5,6 +5,8 @@ exports[`Field footer component Change type 1`] = `
   class="context visibility-hidden"
   style="top: 10px; left: 0px;"
 >
+  <!---->
+   
   <main
     class="context__main"
     style="overflow-y: auto;"

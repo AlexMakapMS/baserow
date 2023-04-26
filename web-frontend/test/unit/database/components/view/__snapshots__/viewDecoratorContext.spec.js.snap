@@ -5,6 +5,8 @@ exports[`GridViewRows component with decoration Default component 1`] = `
   class="context"
   style="max-height: calc(100vh - (25px);"
 >
+  <!---->
+   
   <main
     class="context__main"
     style="overflow-y: auto;"
@@ -70,6 +72,8 @@ exports[`GridViewRows component with decoration Should show cant add decorator t
     class="context"
     style="max-height: calc(100vh - (25px);"
   >
+    <!---->
+     
     <main
       class="context__main"
       style="overflow-y: auto;"
@@ -136,6 +140,8 @@ exports[`GridViewRows component with decoration Should show unavailable decorato
     class="context"
     style="max-height: calc(100vh - (25px);"
   >
+    <!---->
+     
     <main
       class="context__main"
       style="overflow-y: auto;"
@@ -196,6 +202,8 @@ exports[`GridViewRows component with decoration View with decoration configured 
 <div
   class="context"
 >
+  <!---->
+   
   <main
     class="context__main"
     style="overflow-y: auto;"
