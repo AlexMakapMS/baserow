@@ -182,10 +182,9 @@ export default {
         }
       })
 
-      this.setMaxHeight()
-
       this.$el.updatePositionEvent = (event) => {
         updatePosition()
+        this.setMaxHeight()
       }
       window.addEventListener('scroll', this.$el.updatePositionEvent, true)
       window.addEventListener('resize', this.$el.updatePositionEvent)
@@ -445,7 +444,11 @@ export default {
       await this.$nextTick()
       // adding 25px to the calculation so the context menu bottom
       // edge doesn't come too close to the browser window
-      this.$el.style.maxHeight = `calc(100vh - (${this.$el.offsetTop + 25}px)`
+      const offsetValue =
+        this.$el.offsetHeight < this.$el.offsetTop
+          ? this.$el.offsetHeight
+          : this.$el.offsetTop
+      this.$el.style.maxHeight = `calc(100vh - (${offsetValue + 25}px)`
     },
     isContentScrollable() {
       return (
