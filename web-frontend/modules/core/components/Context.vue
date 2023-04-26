@@ -1,5 +1,8 @@
 <template>
   <div class="context" :class="{ 'visibility-hidden': !open || !updatedOnce }">
+    <footer v-if="hasHeaderSlot" class="context__header">
+      <slot name="header"></slot>
+    </footer>
     <main
       ref="mainContainer"
       class="context__main"
@@ -47,6 +50,9 @@ export default {
   computed: {
     hasFooterSlot() {
       return !!this.$slots.footer
+    },
+    hasHeaderSlot() {
+      return !!this.$slots.header
     },
   },
   methods: {

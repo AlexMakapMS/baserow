@@ -30,6 +30,11 @@
   }
 }
 
+.context__header {
+  border-bottom: 1px solid $color-neutral-200;
+  flex: 0 0 auto;
+}
+
 .context__footer {
   border-top: 1px solid $color-neutral-200;
   flex: 0 0 auto;
