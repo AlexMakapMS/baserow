@@ -6,7 +6,7 @@
       v-bind="extraAttr"
       :target="element.target"
       :full-width="element.width === 'full'"
-      @click.prevent=""
+      @click.prevent
     >
       {{ element.value || $t('linkElement.noValue') }}
     </Button>
@@ -15,7 +15,7 @@
       class="link-element__link"
       v-bind="extraAttr"
       :target="`_${element.target}`"
-      @click.prevent=""
+      @click.prevent
     >
       {{ element.value || $t('linkElement.noValue') }}
     </a>

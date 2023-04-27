@@ -59,7 +59,7 @@
         "paragraph": "Paragraph",
         "paragraphDescription": "Single line text",
         "link": "Link",
-        "linkDescription": "A link to another page/URL"
+        "linkDescription": "A link to page/URL"
     },
     "addElementButton": {
         "label": "Element"

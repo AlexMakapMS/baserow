@@ -30,6 +30,16 @@ export default {
   name: 'LinkElement',
   mixins: [textElement],
   props: {
+    /**
+     * @type {object}
+     * @property {string} value The text inside the button
+     * @property {string} alignment left|center|right
+     * @property {string} variant link|button
+     * @property {string} navigation_type page|custom
+     * @property {string} navigate_to_page_id The page id for `page` navigation type.
+     * @property {string} navigate_to_url The URL for `custom` navigation type.
+     * @property {string} target self|blank
+     */
     element: {
       type: Object,
       required: true,
