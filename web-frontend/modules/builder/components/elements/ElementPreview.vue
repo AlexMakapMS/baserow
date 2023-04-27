@@ -1,7 +1,7 @@
 <template>
   <div
     class="element"
-    :class="{ 'element--active': active }"
+    :class="{ 'element--active': active, 'element--in-error': inError }"
     @click="$emit('selected')"
   >
     <InsertElementButton
@@ -70,6 +70,12 @@ export default {
     PLACEMENTS: () => PLACEMENTS,
     elementType() {
       return this.$registry.get('element', this.element.type)
+    },
+    inError() {
+      return this.elementType.isInError({
+        element: this.element,
+        builder: this.builder,
+      })
     },
   },
 }

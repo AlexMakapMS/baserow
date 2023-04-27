@@ -152,7 +152,7 @@
 
 <script>
 import form from '@baserow/modules/core/mixins/form'
-import _ from 'lodash'
+import { LinkElementType } from '@baserow/modules/builder/elementTypes'
 
 export default {
   name: 'LinkElementForm',
@@ -233,13 +233,7 @@ export default {
     },
   },
   mounted() {
-    const destinationPageParamNames = (
-      this.destinationPage?.path_params || []
-    ).map(({ name }) => name)
-
-    const pageParams = this.values.page_parameters.map(({ name }) => name)
-
-    if (!_.isEqual(destinationPageParamNames, pageParams)) {
+    if (LinkElementType.arePathParametersInError(this.values, this.builder)) {
       this.parametersInError = true
     }
   },

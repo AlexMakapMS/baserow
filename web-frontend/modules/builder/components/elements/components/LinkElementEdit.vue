@@ -27,24 +27,23 @@ import textElement from '@baserow/modules/builder/mixins/elements/textElement'
 import { LinkElementType } from '@baserow/modules/builder/elementTypes'
 
 export default {
-  name: 'LinkElement',
+  name: 'LinkElementEdit',
   mixins: [textElement],
   props: {
+    /**
+     * @type {LinkElement}
+     */
     element: {
       type: Object,
       required: true,
     },
     builder: { type: Object, required: true },
   },
-  data() {
-    return { inError: false, url: '' }
-  },
   computed: {
     classes() {
       return {
         [`link-element--alignment-${this.element.alignment}`]: true,
         'element--no-value': !this.element.value,
-        'element--in-error': this.inError,
       }
     },
     extraAttr() {
@@ -54,34 +53,10 @@ export default {
       }
       return attr
     },
-  },
-  watch: {
-    navigation_type() {
-      this.updateUrl()
-    },
-    navigate_to_page_id() {
-      this.updateUrl()
-    },
-    navigate_to_url() {
-      this.updateUrl()
-    },
-    page_parameters: {
-      handler() {
-        this.updateUrl()
-      },
-      deep: true,
-    },
-  },
-  mounted() {
-    this.updateUrl()
-  },
-  methods: {
-    updateUrl() {
-      this.inError = false
+    url() {
       try {
         return LinkElementType.getUrlFromElement(this.element, this.builder)
       } catch (e) {
-        this.inError = true
         return ''
       }
     },

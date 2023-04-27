@@ -139,7 +139,7 @@
   opacity: 0.3;
 }
 
-.element--in-error::before {
+.element--in-error::after {
   @extend .fas;
 
   @include fa-icon;

@@ -26,19 +26,24 @@
 import textElement from '@baserow/modules/builder/mixins/elements/textElement'
 import { LinkElementType } from '@baserow/modules/builder/elementTypes'
 
+/**
+ * @typedef LinkElement
+ * @property {string} value The text inside the button
+ * @property {string} alignment left|center|right
+ * @property {string} variant link|button
+ * @property {string} navigation_type page|custom
+ * @property {string} navigate_to_page_id The page id for `page` navigation type.
+ * @property {object} page_parameters the page paramaters
+ * @property {string} navigate_to_url The URL for `custom` navigation type.
+ * @property {string} target self|blank
+ */
+
 export default {
   name: 'LinkElement',
   mixins: [textElement],
   props: {
     /**
-     * @type {object}
-     * @property {string} value The text inside the button
-     * @property {string} alignment left|center|right
-     * @property {string} variant link|button
-     * @property {string} navigation_type page|custom
-     * @property {string} navigate_to_page_id The page id for `page` navigation type.
-     * @property {string} navigate_to_url The URL for `custom` navigation type.
-     * @property {string} target self|blank
+     * @type {LinkElement}
      */
     element: {
       type: Object,

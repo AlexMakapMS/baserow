@@ -7,6 +7,8 @@ import ParagraphElementForm from '@baserow/modules/builder/components/elements/c
 import HeadingElementForm from '@baserow/modules/builder/components/elements/components/forms/HeadingElementForm'
 import LinkElementForm from '@baserow/modules/builder/components/elements/components/forms/LinkElementForm'
 
+import _ from 'lodash'
+
 import { compile } from 'path-to-regexp'
 
 export class ElementType extends Registerable {
@@ -32,6 +34,15 @@ export class ElementType extends Registerable {
 
   get formComponent() {
     return null
+  }
+
+  /**
+   * Returns whether the element configuration is valid or not.
+   * @param {object} param An object containing the element and the builder
+   * @returns true if the element is in error
+   */
+  isInError({ element, builder }) {
+    return false
   }
 }
 
@@ -116,6 +127,36 @@ export class LinkElementType extends ElementType {
     return LinkElementForm
   }
 
+  isInError({ element, builder }) {
+    try {
+      LinkElementType.getUrlFromElement(element, builder)
+    } catch (e) {
+      // Error in path resolution
+      return true
+    }
+
+    return LinkElementType.arePathParametersInError(element, builder)
+  }
+
+  static arePathParametersInError(element, builder) {
+    if (
+      element.navigation_type === 'page' &&
+      !isNaN(element.navigate_to_page_id)
+    ) {
+      const destinationPageParamNames = (
+        builder.pages.find(({ id }) => id === element.navigate_to_page_id)
+          ?.path_params || []
+      ).map(({ name }) => name)
+
+      const pageParams = element.page_parameters.map(({ name }) => name)
+
+      if (!_.isEqual(destinationPageParamNames, pageParams)) {
+        return true
+      }
+    }
+    return false
+  }
+
   static getUrlFromElement(element, builder) {
     if (element.navigation_type === 'page') {
       if (!isNaN(element.navigate_to_page_id)) {
@@ -134,6 +175,9 @@ export class LinkElementType extends ElementType {
         )
         return toPath(pageParams)
       }
+    } else if (!element.navigate_to_url.startsWith('http')) {
+      // add the https protocol if missing
+      return `https://${element.navigate_to_url}`
     } else {
       return element.navigate_to_url
     }
