@@ -38,7 +38,9 @@
         "heading": "Heading",
         "headingDescription": "Page heading title",
         "paragraph": "Paragraph",
-        "paragraphDescription": "Single line text"
+        "paragraphDescription": "Single line text",
+        "image": "Image",
+        "imageDescription": "Display image"
     },
     "addElementButton": {
         "label": "Element"
@@ -81,6 +83,9 @@
         "textTitle": "Text",
         "textPlaceholder": "Enter text...",
         "textError": "The value is invalid."
+    },
+    "imageElementForm": {
+        "urlTitle": "Image URL"
     },
     "domainSettings": {
         "titleOverview": "Domains",

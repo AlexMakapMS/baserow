@@ -2,7 +2,11 @@ from abc import ABC
 
 from rest_framework import serializers
 
-from baserow.contrib.builder.elements.models import HeadingElement, ParagraphElement
+from baserow.contrib.builder.elements.models import (
+    HeadingElement,
+    ParagraphElement,
+    ImageElement,
+)
 from baserow.contrib.builder.elements.registries import ElementType
 from baserow.contrib.builder.elements.types import Expression
 from baserow.contrib.builder.types import ElementDict
@@ -89,3 +93,26 @@ class ParagraphElementType(BaseTextElementType):
             "Asperiores corporis perspiciatis nam harum veritatis. "
             "Impedit qui maxime aut illo quod ea molestias."
         }
+
+
+class ImageElementType(ElementType):
+    """
+    A simple image element that can display an image either through a remote source
+    or via an uploaded file
+    """
+
+    type = "image"
+    model_class = ImageElement
+    serializer_field_names = ["image_url", "alt_text"]
+    allowed_fields = ["image_url", "alt_text"]
+
+    class SerializedDict(ElementDict):
+        image_url: str
+        alt_text: str
+
+    def get_sample_params(self):
+        return {"image_url": ""}  # TODO
+
+    @property
+    def serializer_field_overrides(self):
+        return {}  # TODO

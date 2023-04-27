@@ -3,6 +3,8 @@ import ParagraphElement from '@baserow/modules/builder/components/elements/compo
 import HeadingElement from '@baserow/modules/builder/components/elements/components/HeadingElement'
 import ParagraphElementForm from '@baserow/modules/builder/components/elements/components/forms/ParagraphElementForm'
 import HeadingElementForm from '@baserow/modules/builder/components/elements/components/forms/HeadingElementForm'
+import ImageElement from '@baserow/modules/builder/components/elements/components/ImageElement'
+import ImageElementForm from '@baserow/modules/builder/components/elements/components/forms/ImageElementForm'
 
 export class ElementType extends Registerable {
   get name() {
@@ -109,6 +111,38 @@ export class ParagraphElementType extends ElementType {
   getComponentProps(element) {
     return {
       value: element.value,
+    }
+  }
+}
+
+export class ImageElementType extends ElementType {
+  getType() {
+    return 'image'
+  }
+
+  get name() {
+    return this.app.i18n.t('elementType.image')
+  }
+
+  get description() {
+    return this.app.i18n.t('elementType.imageDescription')
+  }
+
+  get iconClass() {
+    return 'image'
+  }
+
+  get component() {
+    return ImageElement
+  }
+
+  get formComponent() {
+    return ImageElementForm
+  }
+
+  getComponentProps(element) {
+    return {
+      element,
     }
   }
 }

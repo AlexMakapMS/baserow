@@ -20,7 +20,7 @@
     />
     <component
       :is="elementType.component"
-      v-bind="elementType.getComponentProps(element)"
+      :element="element"
       class="element__component"
     ></component>
     <InsertElementButton

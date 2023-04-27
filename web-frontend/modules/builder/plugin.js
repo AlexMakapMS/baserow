@@ -17,6 +17,7 @@ import domainStore from '@baserow/modules/builder/store/domain'
 import { registerRealtimeEvents } from '@baserow/modules/builder/realtime'
 import {
   HeadingElementType,
+  ImageElementType,
   ParagraphElementType,
 } from '@baserow/modules/builder/elementTypes'
 import {
@@ -95,6 +96,7 @@ export default (context) => {
 
   app.$registry.register('element', new HeadingElementType(context))
   app.$registry.register('element', new ParagraphElementType(context))
+  app.$registry.register('element', new ImageElementType(context))
 
   app.$registry.register('device', new DesktopDeviceType(context))
   app.$registry.register('device', new TabletDeviceType(context))

@@ -88,11 +88,16 @@ class BuilderConfig(AppConfig):
         operation_type_registry.register(UpdateElementOperationType())
         operation_type_registry.register(DeleteElementOperationType())
 
-        from .elements.element_types import HeadingElementType, ParagraphElementType
+        from .elements.element_types import (
+            HeadingElementType,
+            ParagraphElementType,
+            ImageElementType,
+        )
         from .elements.registries import element_type_registry
 
         element_type_registry.register(HeadingElementType())
         element_type_registry.register(ParagraphElementType())
+        element_type_registry.register(ImageElementType())
 
         # The signals must always be imported last because they use the registries
         # which need to be filled first.

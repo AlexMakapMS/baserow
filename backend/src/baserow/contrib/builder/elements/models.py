@@ -116,3 +116,19 @@ class ParagraphElement(BaseTextElement):
     """
     A simple paragraph.
     """
+
+
+class ImageElement(Element):
+    """
+    A simple image element that can display an image either through a remote source
+    or via an uploaded file
+    """
+
+    # TODO add reference to image file
+
+    image_url = models.URLField(help_text="A link to the image file", null=True)
+    alt_text = models.TextField(
+        help_text="Text that is displayed when the image can't load",
+        default="",
+        blank=True,
+    )
