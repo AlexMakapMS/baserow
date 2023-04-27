@@ -85,7 +85,8 @@
         "textError": "The value is invalid."
     },
     "imageElementForm": {
-        "urlTitle": "Image URL"
+        "urlTitle": "Image URL",
+        "invalidUrlError": "URL is invalid"
     },
     "domainSettings": {
         "titleOverview": "Domains",

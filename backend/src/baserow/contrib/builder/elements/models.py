@@ -126,7 +126,11 @@ class ImageElement(Element):
 
     # TODO add reference to image file
 
-    image_url = models.URLField(help_text="A link to the image file", null=True)
+    image_url = models.URLField(
+        help_text="A link to the image file",
+        blank=True,
+        default="",
+    )
     alt_text = models.TextField(
         help_text="Text that is displayed when the image can't load",
         default="",
