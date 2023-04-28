@@ -90,8 +90,8 @@ class BuilderConfig(AppConfig):
 
         from .elements.element_types import (
             HeadingElementType,
-            ParagraphElementType,
             ImageElementType,
+            ParagraphElementType,
         )
         from .elements.registries import element_type_registry
 

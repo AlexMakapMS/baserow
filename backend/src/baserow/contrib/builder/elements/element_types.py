@@ -4,8 +4,8 @@ from rest_framework import serializers
 
 from baserow.contrib.builder.elements.models import (
     HeadingElement,
-    ParagraphElement,
     ImageElement,
+    ParagraphElement,
 )
 from baserow.contrib.builder.elements.registries import ElementType
 from baserow.contrib.builder.elements.types import Expression
