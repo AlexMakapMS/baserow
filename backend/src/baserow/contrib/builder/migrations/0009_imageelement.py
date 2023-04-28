@@ -7,20 +7,42 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('builder', '0008_change_page_params'),
+        ("builder", "0008_change_page_params"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ImageElement',
+            name="ImageElement",
             fields=[
-                ('element_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='builder.element')),
-                ('image_url', models.URLField(blank=True, default='', help_text='A link to the image file')),
-                ('alt_text', models.TextField(blank=True, default='', help_text="Text that is displayed when the image can't load")),
+                (
+                    "element_ptr",
+                    models.OneToOneField(
+                        auto_created=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        parent_link=True,
+                        primary_key=True,
+                        serialize=False,
+                        to="builder.element",
+                    ),
+                ),
+                (
+                    "image_url",
+                    models.URLField(
+                        blank=True, default="", help_text="A link to the image file"
+                    ),
+                ),
+                (
+                    "alt_text",
+                    models.TextField(
+                        blank=True,
+                        default="",
+                        help_text="Text that is displayed when the image can't load",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
-            bases=('builder.element',),
+            bases=("builder.element",),
         ),
     ]
