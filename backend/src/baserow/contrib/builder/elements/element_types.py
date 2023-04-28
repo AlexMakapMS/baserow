@@ -111,7 +111,10 @@ class ImageElementType(ElementType):
         alt_text: str
 
     def get_sample_params(self):
-        return {"image_url": ""}  # TODO
+        return {
+            "image_url": "https://test.com/image.png",
+            "alt_text": "some alt text",
+        }
 
     @property
     def serializer_field_overrides(self):
