@@ -12,7 +12,7 @@
 import textElement from '@baserow/modules/builder/mixins/elements/textElement'
 
 export default {
-  name: 'HeaderElement',
+  name: 'HeadingElement',
   mixins: [textElement],
   props: {
     level: {
