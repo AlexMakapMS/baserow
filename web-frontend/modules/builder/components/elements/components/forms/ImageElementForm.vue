@@ -10,6 +10,7 @@
           :class="{ 'input--error': fieldHasErrors('image_url') }"
           class="input"
           type="url"
+          :placeholder="$t('elementForms.urlInputPlaceholder')"
           @blur="$v.values.image_url.$touch()"
         />
         <div
@@ -21,6 +22,19 @@
         >
           {{ $t('imageElementForm.invalidUrlError') }}
         </div>
+      </div>
+    </FormElement>
+    <FormElement class="control">
+      <label class="control__label">
+        {{ $t('imageElementForm.altTextTitle') }}
+      </label>
+      <div class="control__elements">
+        <input
+          v-model="values.alt_text"
+          :placeholder="$t('elementForms.textInputPlaceholder')"
+          type="text"
+          class="input"
+        />
       </div>
     </FormElement>
   </form>
@@ -37,6 +51,7 @@ export default {
     return {
       values: {
         image_url: '',
+        alt_text: '',
       },
     }
   },

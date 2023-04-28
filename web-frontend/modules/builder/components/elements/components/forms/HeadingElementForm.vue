@@ -26,7 +26,7 @@
           v-model="values.value"
           type="text"
           class="input"
-          :placeholder="$t('headingElementForm.textPlaceholder')"
+          :placeholder="$t('elementForms.textInputPlaceholder')"
         />
       </div>
     </FormElement>

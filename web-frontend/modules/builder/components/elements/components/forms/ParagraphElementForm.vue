@@ -8,7 +8,7 @@
         <textarea
           v-model="values.value"
           rows="12"
-          :placeholder="$t('paragraphElementForm.textPlaceholder')"
+          :placeholder="$t('elementForms.textInputPlaceholder')"
           type="text"
           class="input paragraph-element-form__value"
         />

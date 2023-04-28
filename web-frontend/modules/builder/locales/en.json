@@ -66,6 +66,10 @@
     "emptySidePanelState": {
         "message": "Click on one of the elements to see more details"
     },
+    "elementForms": {
+        "textInputPlaceholder": "Enter text...",
+        "urlInputPlaceholder": "Enter url..."
+    },
     "headingElement": {
         "noValue": "No title..."
     },
@@ -84,9 +88,13 @@
         "textPlaceholder": "Enter text...",
         "textError": "The value is invalid."
     },
+    "imageElement": {
+        "emptyState": "No alt text defined..."
+    },
     "imageElementForm": {
         "urlTitle": "Image URL",
-        "invalidUrlError": "URL is invalid"
+        "invalidUrlError": "URL is invalid",
+        "altTextTitle": "Alt text"
     },
     "domainSettings": {
         "titleOverview": "Domains",
